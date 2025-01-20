@@ -14,10 +14,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.time.LocalDate;
+import java.util.*;
 
 @Service
 public class CustomerSerImpl implements ICustomer {
@@ -97,14 +95,27 @@ public class CustomerSerImpl implements ICustomer {
 
         CustomerDTO customerDTO = modelMapper.map(customer, CustomerDTO.class);
 
-        List<LicenseOfCustomer> licenceDTOs = new ArrayList<>();
-        for (LicenseOfCustomer licence : customer.getLicence()) {
-            LicenseOfCustomerDTO licenceDTO = modelMapper.map(licence, LicenseOfCustomerDTO.class);
-            licenceDTOs.add(licence);
+        LicenseOfCustomer mostRecentLicense = null;
+        LocalDate mostRecentIssueDate = null;
+
+        for (LicenseOfCustomer license : customer.getLicence()) {
+
+            if (mostRecentIssueDate == null || license.getIssueDate().isAfter(mostRecentIssueDate)) {
+                mostRecentLicense = license;
+                mostRecentIssueDate = license.getIssueDate();
+            }
         }
-        customer.setLicence(licenceDTOs);
+
+        if (mostRecentLicense != null) {
+            LicenseOfCustomerDTO recentLicenseDTO = modelMapper.map(mostRecentLicense, LicenseOfCustomerDTO.class);
+            customerDTO.setLicenceDTOS(Collections.singletonList(recentLicenseDTO));
+        } else {
+            customerDTO.setLicenceDTOS(Collections.emptyList());
+        }
+
         return customerDTO;
     }
+
 
     public List<CustomerDTO> getAllCustomers() {
         List<Customer> customers = customerRepository.findAll();
