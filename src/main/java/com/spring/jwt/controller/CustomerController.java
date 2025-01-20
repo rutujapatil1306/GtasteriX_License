@@ -73,6 +73,33 @@ public class CustomerController {
     }
 
 
+    @GetMapping("/getByName")
+    public ResponseEntity<BaseResponseDTO> getCustomerByName(@RequestParam String customerName) {
+        try {
+            List<CustomerDTO> customers = icustomer.searchCustomerByName(customerName);
+            return ResponseEntity.ok(new BaseResponseDTO(customers, "SUCCESS", "Customers fetched successfully."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new BaseResponseDTO(null, "ERROR", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new BaseResponseDTO(null, "ERROR", e.getMessage()));
+        }
+    }
+    @GetMapping("/filter")
+    public ResponseEntity<BaseResponseDTO> getByFilter( @RequestParam(required = false) String name,
+                                                        @RequestParam(required = false) String area,
+                                                        @RequestParam(required = false) String email){
+        try{
+            List<CustomerDTO> list=icustomer.getByFilter(name,area,email);
+            return ResponseEntity.ok(new BaseResponseDTO(list,"ALL OK","Customer list Successfully"));
+        }
+        catch(Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new BaseResponseDTO(null,"ERROR",e.getMessage()));
+        }
+    }
+
+
 
 
 }
