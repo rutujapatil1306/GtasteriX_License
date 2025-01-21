@@ -22,7 +22,7 @@ public class LicenseOfCustomerDTO {
 
         private LocalDate expiryDate;
 
-//       private Customer customer;
+       private CustomerDTO customer;
 //        private LicenseList license;
     }
 

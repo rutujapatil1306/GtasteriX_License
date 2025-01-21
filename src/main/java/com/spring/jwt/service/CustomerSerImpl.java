@@ -131,7 +131,7 @@ public class CustomerSerImpl implements ICustomer {
 
     @Override
     public List<CustomerDTO> searchCustomerByName(String name) {
-        List<Customer> foundCustomers = customerRepository.findByNameContainingIgnoreCaseOrderByNameAsc(name);
+        List<Customer> foundCustomers = customerRepository.findByFirstNameContainingIgnoreCaseOrderByFirstNameAsc(name);
         System.out.println(foundCustomers.size());
         // Convert List<Customer> to List<CustomerDTO> using ModelMapper
         List<CustomerDTO> customerDTOs = new ArrayList<>();
@@ -143,10 +143,10 @@ public class CustomerSerImpl implements ICustomer {
     }
 
     @Override
-    public List<CustomerDTO> getByFilter(String name, String area, String email) {
+    public List<CustomerDTO> getByFilter(String firstName, String area, String email) {
         List<Customer> customerList;
-        if (name != null) {
-            customerList = customerRepository.findByName(name);
+        if (firstName != null) {
+            customerList = customerRepository.findByFirstName(firstName);
         } else if (area != null) {
             customerList = customerRepository.findByArea(area);
         } else if (email != null) {
