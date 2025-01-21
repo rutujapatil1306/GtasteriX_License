@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
+@CrossOrigin
 @RequestMapping("api/customer")
 public class CustomerController {
 
@@ -47,6 +48,8 @@ public class CustomerController {
     }
 
 
+
+    //for particular cusomer
     @GetMapping("/getCustomerWithLicenses")
     public ResponseEntity<BaseResponseDTO> getCustomerWithLicenses(@RequestParam UUID customerId) {
         try {

@@ -13,6 +13,7 @@ import java.util.UUID;
 
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/licenseList")
 public class LicenseListController {
 
