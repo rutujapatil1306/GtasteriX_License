@@ -11,4 +11,13 @@ public interface CustomerRepository extends JpaRepository<Customer,UUID> {
 
   @Query("SELECT c.mobileNumber FROM Customer c")
   List<String> getAllMobileNumbers();
+
+  List<Customer> findByNameContainingIgnoreCaseOrderByNameAsc(String name);
+
+  List<Customer> findByName(String name);
+
+  List<Customer> findByArea(String area);
+
+  List<Customer> findByEmail(String Email);
+
 }
