@@ -98,7 +98,29 @@ public class CustomerController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new BaseResponseDTO(null,"ERROR",e.getMessage()));
         }
     }
+    @PatchMapping("/UpdateLicense")
+    public ResponseEntity<BaseResponseDTO> assignLicenceToCustomer(@RequestParam UUID customerId, @RequestBody CustomerDTO customerDTO) {
+        try {
+            CustomerDTO updatedCustomer = icustomer.UpdateCustomerDetail(customerId,customerDTO);
+            BaseResponseDTO responseDTO = new BaseResponseDTO(updatedCustomer, "SUCCESS", "Licence Updated Successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        } catch (RuntimeException e) {
+            BaseResponseDTO errorResponseDTO = new BaseResponseDTO(null, "ERROR", "Failed to Update : " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDTO);
+        }
+    }
 
+    @DeleteMapping("/DeleteCustomerById")
+    public ResponseEntity<BaseResponseDTO> DeleteCustomer(@RequestParam UUID CustomerId){
+        try{
+            CustomerDTO customerDTO= icustomer.deleteCustomer(CustomerId);
+            BaseResponseDTO responseDTO=new BaseResponseDTO(customerDTO,"success","Delete Succesfully");
+            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        }catch (Exception e){
+            BaseResponseDTO responseDTO=new BaseResponseDTO(e.getMessage(),"Error","Failed To Delete");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDTO);
+        }
+    }
 
 
 

@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -171,9 +170,45 @@ public class CustomerSerImpl implements ICustomer {
         return customerDTOList;
     }
 
+    @Override
+    public CustomerDTO UpdateCustomerDetail(UUID customerId, CustomerDTO customerDTO) {
+        Customer customer=customerRepository.findById(customerId).orElseThrow(()->new RuntimeException("Id Not Found"));
 
+        if(customerDTO.getFirstName()!=null){
+            customer.setFirstName(customerDTO.getFirstName());
+        }
+        if(customerDTO.getLastName()!=null){
+            customer.setLastName(customerDTO.getLastName());
+        }
+        if(customerDTO.getEmail()!=null){
+            customer.setEmail(customerDTO.getEmail());
+        }
+        if(customerDTO.getArea()!=null){
+            customer.setArea(customerDTO.getArea());
+        }
+        if (customerDTO.getMobileNumber()!=null){
+            customer.setMobileNumber(customerDTO.getMobileNumber());
+        }
+        if (customerDTO.getPincode()!=null){
+            customer.setPincode(customerDTO.getPincode());
+        }
+        if (customerDTO.getCity()!=null){
+            customer.setCity(customerDTO.getCity());
+        }
+        if(customerDTO.getState()!=null){
+            customer.setState(customerDTO.getState());
+        }
+        Customer savecustomer=customerRepository.save(customer);
+        return modelMapper.map(savecustomer,CustomerDTO.class);
+    }
 
-
+    @Override
+    public CustomerDTO deleteCustomer(UUID customerId) {
+        Customer customer= customerRepository.findById(customerId).
+                orElseThrow(()->new RuntimeException(" Id not Found"+customerId));
+        customerRepository.delete(customer);
+        return null;
+    }
 
 }
 
