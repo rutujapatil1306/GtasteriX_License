@@ -20,5 +20,5 @@ public interface LicenseOfCustomerRepository extends JpaRepository<LicenseOfCust
     Optional<LicenseOfCustomer> findByCustomerIdAndLicenseId( UUID customerId,  UUID licenseId);
 
 
-
+    List<LicenseOfCustomer> findByLicense_LicenseID(UUID licenseListID);
 }

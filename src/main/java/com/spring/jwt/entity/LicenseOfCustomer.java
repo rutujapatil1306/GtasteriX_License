@@ -16,6 +16,9 @@ public class LicenseOfCustomer {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID licenseOfCustomerId;
 
+    @Version
+    private int version;
+
     @Column(nullable = false)
     private String licenseName;
 
@@ -38,4 +41,7 @@ public class LicenseOfCustomer {
     @JoinColumn(name = "license_id", nullable = false)
 
     private LicenseList license;
+
+//    public int getVersion() {
+//    }
 }

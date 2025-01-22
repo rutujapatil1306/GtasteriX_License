@@ -67,21 +67,13 @@ public class LicenseListImpl implements ILicenseList {
         // Fetch all LicenseOfCustomer entities associated with this license
         List<LicenseOfCustomer> licenseOfCustomers = repository.findByLicense_LicenseID(licenseListID);
 
-        // Break the relationship between Customer and LicenseOfCustomer
+        // Nullify the reference between `LicenseOfCustomer` and `LicenseList`
         for (LicenseOfCustomer licenseOfCustomer : licenseOfCustomers) {
-            Customer customer = licenseOfCustomer.getCustomer();
-            if (customer != null) {
-                customer.getLicence().remove(licenseOfCustomer); // Remove mapping
-                customerRepo.save(customer); // Persist updated customer
-            }
+            licenseOfCustomer.setLicense(null);  // Remove the reference to LicenseList
+            repository.save(licenseOfCustomer);
         }
 
-        // Delete the LicenseOfCustomer entries
-        for (LicenseOfCustomer licenseOfCustomer : licenseOfCustomers) {
-            repository.delete(licenseOfCustomer);
-        }
-
-        // Finally, delete the license from LicenseList
+        // Now delete the license from the LicenseList table
         licenseListRepository.delete(license);
     }
 
