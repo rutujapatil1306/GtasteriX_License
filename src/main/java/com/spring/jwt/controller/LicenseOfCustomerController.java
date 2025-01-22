@@ -38,7 +38,7 @@ public class LicenseOfCustomerController {
         } catch (Exception e) {
             System.err.println("Unexpected error: " + e.getMessage());
 
-            BaseResponseDTO errorResponse = new BaseResponseDTO("An unexpected error occurred", "Error", "Status Not updated");
+            BaseResponseDTO errorResponse = new BaseResponseDTO("An unexpected error occurred", "Error", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
@@ -55,5 +55,20 @@ public class LicenseOfCustomerController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponseDTO);
         }
     }
+
+    @GetMapping("/getAllLicenseOfCustomer")
+    public ResponseEntity<BaseResponseDTO> getAllLicenseOfCustomer() {
+        try {
+            List<LicenseOfCustomerDTO> allLicenses = iLicenseOfCustomer.getAllLicenseOfCustomer();
+
+            BaseResponseDTO response = new BaseResponseDTO(allLicenses, "ALL OK", "All LicenseOfCustomer fetched successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (Exception e) {
+            BaseResponseDTO errorResponse = new BaseResponseDTO(
+                    e.getMessage(), "Error", "Unable to fetch LicenseOfCustomer");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
 
 }

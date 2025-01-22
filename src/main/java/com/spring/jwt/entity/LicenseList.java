@@ -14,11 +14,10 @@ public class LicenseList {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID licenseID;
 
-    @Column(nullable = false)
+    @Column(nullable = false,unique = true)
     private String licenseName;
 
     @Column(nullable = false)
     private Integer validTill;
-
 
 }

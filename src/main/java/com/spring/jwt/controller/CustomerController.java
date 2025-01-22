@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@CrossOrigin
 @RequestMapping("api/customer")
 public class CustomerController {
 
@@ -47,9 +46,6 @@ public class CustomerController {
         }
     }
 
-
-
-    //for particular cusomer
     @GetMapping("/getCustomerWithLicenses")
     public ResponseEntity<BaseResponseDTO> getCustomerWithLicenses(@RequestParam UUID customerId) {
         try {
@@ -75,7 +71,6 @@ public class CustomerController {
         }
     }
 
-
     @GetMapping("/getByName")
     public ResponseEntity<BaseResponseDTO> getCustomerByName(@RequestParam String customerName) {
         try {
@@ -89,6 +84,7 @@ public class CustomerController {
                     .body(new BaseResponseDTO(null, "ERROR", e.getMessage()));
         }
     }
+
     @GetMapping("/filter")
     public ResponseEntity<BaseResponseDTO> getByFilter( @RequestParam(required = false) String name,
                                                         @RequestParam(required = false) String area,
@@ -101,6 +97,7 @@ public class CustomerController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new BaseResponseDTO(null,"ERROR",e.getMessage()));
         }
     }
+
     @PatchMapping("/UpdateLicense")
     public ResponseEntity<BaseResponseDTO> assignLicenceToCustomer(@RequestParam UUID customerId, @RequestBody CustomerDTO customerDTO) {
         try {

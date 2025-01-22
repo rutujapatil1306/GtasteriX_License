@@ -12,4 +12,6 @@ public interface ILicenseOfCustomer {
 
 
     List<LicenseOfCustomerDTO> findByStatus(String status);
+
+    List<LicenseOfCustomerDTO> getAllLicenseOfCustomer();
 }
