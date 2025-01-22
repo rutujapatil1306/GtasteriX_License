@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -129,10 +128,94 @@ public class CustomerSerImpl implements ICustomer {
 
 
 
+    @Override
+    public List<CustomerDTO> searchCustomerByName(String name) {
+        List<Customer> foundCustomers = customerRepository.findByFirstNameContainingIgnoreCaseOrderByFirstNameAsc(name);
+        System.out.println(foundCustomers.size());
+        // Convert List<Customer> to List<CustomerDTO> using ModelMapper
+        List<CustomerDTO> customerDTOs = new ArrayList<>();
+        for (Customer customer : foundCustomers) {
+            CustomerDTO dto = modelMapper.map(customer, CustomerDTO.class);
+            customerDTOs.add(dto);
+        }
+        return customerDTOs; // Return the list of DTOs
+    }
+
+    @Override
+    public List<CustomerDTO> getByFilter(String firstName, String area, String email) {
+        List<Customer> customerList;
+        if (firstName != null) {
+            customerList = customerRepository.findByFirstName(firstName);
+        } else if (area != null) {
+            customerList = customerRepository.findByArea(area);
+        } else if (email != null) {
+            customerList = customerRepository.findByEmail(email);
+        } else {
+            customerList = customerRepository.findAll();
+        }
 
 
+        System.out.println("Number of customers found: " + customerList.size());
 
+
+        return mapToDTOList(customerList);
+    }
+
+
+    private List<CustomerDTO> mapToDTOList(List<Customer> customers) {
+        List<CustomerDTO> customerDTOList = new ArrayList<>();
+        for (Customer customer : customers) {
+            customerDTOList.add(modelMapper.map(customer, CustomerDTO.class));
+        }
+        return customerDTOList;
+    }
+
+    @Override
+    public CustomerDTO UpdateCustomerDetail(UUID customerId, CustomerDTO customerDTO) {
+        Customer customer=customerRepository.findById(customerId).orElseThrow(()->new RuntimeException("Id Not Found"));
+
+        if(customerDTO.getFirstName()!=null){
+            customer.setFirstName(customerDTO.getFirstName());
+        }
+        if(customerDTO.getLastName()!=null){
+            customer.setLastName(customerDTO.getLastName());
+        }
+        if(customerDTO.getEmail()!=null){
+            customer.setEmail(customerDTO.getEmail());
+        }
+        if(customerDTO.getArea()!=null){
+            customer.setArea(customerDTO.getArea());
+        }
+        if (customerDTO.getMobileNumber()!=null){
+            customer.setMobileNumber(customerDTO.getMobileNumber());
+        }
+        if (customerDTO.getPincode()!=null){
+            customer.setPincode(customerDTO.getPincode());
+        }
+        if (customerDTO.getCity()!=null){
+            customer.setCity(customerDTO.getCity());
+        }
+        if(customerDTO.getState()!=null){
+            customer.setState(customerDTO.getState());
+        }
+        Customer savecustomer=customerRepository.save(customer);
+        return modelMapper.map(savecustomer,CustomerDTO.class);
+    }
+
+    @Override
+    public CustomerDTO deleteCustomer(UUID customerId) {
+        Customer customer= customerRepository.findById(customerId).
+                orElseThrow(()->new RuntimeException(" Id not Found"+customerId));
+        customerRepository.delete(customer);
+        return null;
+    }
 
 }
+
+
+
+
+
+
 
 

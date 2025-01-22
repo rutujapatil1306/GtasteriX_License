@@ -22,14 +22,36 @@ public class LicenseOfCustomerController {
     private ILicenseOfCustomer iLicenseOfCustomer;
 
     @PatchMapping("/updateStatus")
-    public ResponseEntity<BaseResponseDTO> updateStatus(@RequestParam UUID licenseOfCustomerId){
-        try{
-            CustomerDTO customerDTO = iLicenseOfCustomer.updateStatus(licenseOfCustomerId);
-            BaseResponseDTO response = new BaseResponseDTO(customerDTO,"Success","Status Updated Successfully");
-            return ResponseEntity.status(HttpStatus.OK).body(response);
+    public ResponseEntity<BaseResponseDTO> updateStatus(@RequestParam UUID licenseOfCustomerId, @RequestParam String status) {
+        try {
+            System.out.println("Updating status for LicenseOfCustomerId: " + licenseOfCustomerId + ", New Status: " + status);
+
+            CustomerDTO customerDTO = iLicenseOfCustomer.updateStatus(licenseOfCustomerId, status);
+
+            BaseResponseDTO response = new BaseResponseDTO(customerDTO, "Success", "Status Updated Successfully");
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            System.err.println("Error: " + e.getMessage());
+
+            BaseResponseDTO errorResponse = new BaseResponseDTO(e.getMessage(), "Error", "Status Not updated");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        } catch (Exception e) {
+            System.err.println("Unexpected error: " + e.getMessage());
+
+            BaseResponseDTO errorResponse = new BaseResponseDTO("An unexpected error occurred", "Error", "Status Not updated");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
-        catch (Exception e){
-            BaseResponseDTO errorResponseDTO = new BaseResponseDTO(e.getMessage(),"Error","Status Not updated");
+    }
+
+
+    @GetMapping("/byStatus")
+    public ResponseEntity<BaseResponseDTO> statusBy(@RequestParam String status) {
+        try {
+            List<LicenseOfCustomerDTO> co = iLicenseOfCustomer.findByStatus(status);
+            BaseResponseDTO bs = new BaseResponseDTO(co, "ALL OK", "By Status Get successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(bs);
+        } catch (Exception e) {
+            BaseResponseDTO errorResponseDTO = new BaseResponseDTO(e.getMessage(), "Error", "Status Not Get");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponseDTO);
         }
     }
