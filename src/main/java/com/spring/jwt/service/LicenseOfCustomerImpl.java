@@ -165,8 +165,15 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
                 CustomerDTO customerDTO = modelMapper.map(license.getCustomer(), CustomerDTO.class);
                 licenseDTO.setCustomer(customerDTO);
             }
+            if (license.getLicense() != null) {
+                LicenseListDTO licenseListDTO = modelMapper.map(license.getLicense(), LicenseListDTO.class);
+                licenseDTO.setLicenseList(licenseListDTO); // Set LicenseListDTO in LicenseOfCustomerDTO
+            }
+
+            // Add the mapped LicenseOfCustomerDTO to the list
             licenseOfCustomerDTOs.add(licenseDTO);
         }
+
         return licenseOfCustomerDTOs;
     }
 
