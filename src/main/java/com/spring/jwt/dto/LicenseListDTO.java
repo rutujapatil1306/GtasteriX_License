@@ -15,5 +15,5 @@ public class LicenseListDTO {
 
     private Integer validTill;
 
-  //  private List<LicenseOfCustomer> licence;
+   // private List<LicenseOfCustomer> licenseOfCustomers;
 }
