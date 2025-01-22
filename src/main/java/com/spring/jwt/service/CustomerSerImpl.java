@@ -89,7 +89,7 @@ public class CustomerSerImpl implements ICustomer {
             licenceDTO.setStatus(lic.getStatus());
             licenceDTOs.add(licenceDTO);
         }
-        customerDTO.setLicenceDTOS(licenceDTOs);
+        customerDTO.setLicenseOfCustomerDTOS(licenceDTOs);
         return customerDTO;
     }
 
@@ -125,7 +125,7 @@ public class CustomerSerImpl implements ICustomer {
                 licenceDTOs.add(licenceDTO);
             }
 
-            customerDTO.setLicenceDTOS(licenceDTOs);
+            customerDTO.setLicenseOfCustomerDTOS(licenceDTOs);
             customerDTOs.add(customerDTO);
         }
 
