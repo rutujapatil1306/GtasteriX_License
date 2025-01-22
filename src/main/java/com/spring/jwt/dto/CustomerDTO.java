@@ -41,7 +41,7 @@ public class CustomerDTO {
 
     private String pincode;
 
-    private List<LicenseOfCustomerDTO> licenceDTOS;
+    private List<LicenseOfCustomerDTO> licenseOfCustomerDTOS;
 }
 
 

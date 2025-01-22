@@ -133,7 +133,7 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
         }
 
         CustomerDTO customerDTO = modelMapper.map(customer, CustomerDTO.class);
-        customerDTO.setLicenceDTOS(customer.getLicence().stream()
+        customerDTO.setLicenseOfCustomerDTOS(customer.getLicence().stream()
                 .map(lic -> modelMapper.map(lic, LicenseOfCustomerDTO.class))
                 .collect(Collectors.toList()));
 
@@ -167,14 +167,14 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
             }
             if (license.getLicense() != null) {
                 LicenseListDTO licenseListDTO = modelMapper.map(license.getLicense(), LicenseListDTO.class);
-                licenseDTO.setLicenseList(licenseListDTO); // Set LicenseListDTO in LicenseOfCustomerDTO
+                licenseDTO.setLicenseList(licenseListDTO);
             }
 
-            // Add the mapped LicenseOfCustomerDTO to the list
             licenseOfCustomerDTOs.add(licenseDTO);
-        }
 
-        return licenseOfCustomerDTOs;
+        }
+            return licenseOfCustomerDTOs;
+
     }
 
 
