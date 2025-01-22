@@ -37,7 +37,7 @@ public class LicenseOfCustomerController {
         } catch (Exception e) {
             System.err.println("Unexpected error: " + e.getMessage());
 
-            BaseResponseDTO errorResponse = new BaseResponseDTO("An unexpected error occurred", "Error", "Status Not updated");
+            BaseResponseDTO errorResponse = new BaseResponseDTO("An unexpected error occurred", "Error", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }

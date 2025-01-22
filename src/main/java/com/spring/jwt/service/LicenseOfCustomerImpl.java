@@ -94,24 +94,7 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
             throw new RuntimeException("Invalid status value: " + status);
         }
 
-        switch (licenseOfCustomer.getStatus()) {
-            case NO_STATUS:
-                if (newStatus != Status.PENDING) {
-                    throw new RuntimeException("Invalid transition: NO_STATUS can only transition to PENDING");
-                }
-                break;
-            case PENDING:
-                if (newStatus != Status.ACTIVE && newStatus != Status.REJECTED) {
-                    throw new RuntimeException("Invalid transition: PENDING can only transition to ACTIVE or REJECTED");
-                }
-                break;
-            case ACTIVE:
-            case REJECTED:
-                throw new RuntimeException("Invalid transition: Status " + licenseOfCustomer.getStatus() + " cannot be changed");
-            default:
-                throw new RuntimeException("Unknown current status: " + licenseOfCustomer.getStatus());
-        }
-
+        // Directly set the new status without any validation
         licenseOfCustomer.setStatus(newStatus);
 
         if (newStatus == Status.ACTIVE) {
@@ -123,8 +106,7 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
             licenseOfCustomer.setExpiryDate(LocalDate.now().plusYears(licenseList.getValidTill()));
         }
 
-
-        licenseOfCustomerRepository.save(licenseOfCustomer);
+        licenseOfCustomerRepository.save(licenseOfCustomer);  // Save the updated license
 
         // Map customer to DTO
         Customer customer = licenseOfCustomer.getCustomer();
@@ -139,6 +121,8 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
 
         return customerDTO;
     }
+
+
 
 
     @Override
@@ -176,6 +160,7 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
             return licenseOfCustomerDTOs;
 
     }
+
 
 
 }

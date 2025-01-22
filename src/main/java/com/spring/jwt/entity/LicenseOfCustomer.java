@@ -16,6 +16,9 @@ public class LicenseOfCustomer {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID licenseOfCustomerId;
 
+    @Version
+    private int version;
+
     @Column(nullable = false)
     private String licenseName;
 
@@ -34,7 +37,11 @@ public class LicenseOfCustomer {
     @JsonBackReference
     private Customer customer;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     @JoinColumn(name = "license_id", nullable = false)
+
     private LicenseList license;
+
+//    public int getVersion() {
+//    }
 }
