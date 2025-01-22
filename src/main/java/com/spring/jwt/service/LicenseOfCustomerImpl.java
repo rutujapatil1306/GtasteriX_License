@@ -143,17 +143,39 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
 
     @Override
     public List<LicenseOfCustomerDTO> findByStatus(String status) {
-        Status st=Status.valueOf(status.toUpperCase());
-        List<LicenseOfCustomer> ll=licenseOfCustomerRepository.findByStatus(st);
-        List<LicenseOfCustomerDTO> li=new ArrayList<>();
-        for(LicenseOfCustomer  ofCustomer:ll){
-            li.add(modelMapper.map(ofCustomer,LicenseOfCustomerDTO.class));
+        Status st = Status.valueOf(status.toUpperCase());
+        List<LicenseOfCustomer> ll = licenseOfCustomerRepository.findByStatus(st);
+        List<LicenseOfCustomerDTO> li = new ArrayList<>();
+        for (LicenseOfCustomer ofCustomer : ll) {
+            li.add(modelMapper.map(ofCustomer, LicenseOfCustomerDTO.class));
         }
         return li;
     }
 
+    @Override
+    public List<LicenseOfCustomerDTO> getAllLicenseOfCustomer() {
+        List<LicenseOfCustomerDTO> licenseOfCustomerDTOs = new ArrayList<>();
+
+        List<LicenseOfCustomer> licenseOfCustomers = licenseOfCustomerRepository.findAll();
+
+        for (LicenseOfCustomer license : licenseOfCustomers) {
+            LicenseOfCustomerDTO licenseDTO = modelMapper.map(license, LicenseOfCustomerDTO.class);
+
+            if (license.getCustomer() != null) {
+                CustomerDTO customerDTO = modelMapper.map(license.getCustomer(), CustomerDTO.class);
+                licenseDTO.setCustomer(customerDTO);
+            }
+            licenseOfCustomerDTOs.add(licenseDTO);
+        }
+        return licenseOfCustomerDTOs;
+    }
 
 
 }
+
+
+
+
+
 
 
