@@ -15,8 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -49,57 +49,22 @@ public class CustomerSerImpl implements ICustomer {
         return modelMapper.map(customer1, CustomerDTO.class);
     }
 
-
-//    @Override
-//    public CustomerDTO assignLicenceAndSetStatus(UUID customerId, UUID licenseID) {
-//
-//        Customer customer = customerRepository.findById(customerId)
-//                .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
-//
-//        LicenseList licenseList = licenseListRepository.findById(licenseID)
-//                .orElseThrow(() -> new RuntimeException("License not found with ID: " + licenseID));
-//
-//        LicenseOfCustomer licenseOfCustomer1 = new LicenseOfCustomer();
-//        licenseOfCustomer1.setLicense(licenseList);
-//        licenseOfCustomer1.setCustomer(customer);
-//        licenseOfCustomer1.setLicenseName(licenseList.getLicenseName());
-//
-//        licenseOfCustomer1.setStatus(Status.PENDING);
-//
-//        licenseOfCustomerRepository.save(licenseOfCustomer1);
-//
-//        if (customer.getLicence() == null) {
-//            customer.setLicence(new ArrayList<>());
-//        }
-//        customer.getLicence().add(licenseOfCustomer1);
-//
-//        Customer updatedCustomer = customerRepository.save(customer);
-//
-//        CustomerDTO customerDTO = modelMapper.map(updatedCustomer, CustomerDTO.class);
-//
-//        List<LicenseOfCustomerDTO> licenceDTOs = new ArrayList<>();
-//        for (LicenseOfCustomer lic : updatedCustomer.getLicence()) {
-//            LicenseOfCustomerDTO licenceDTO = new LicenseOfCustomerDTO();
-//            licenceDTO.setLicenseOfCustomerId(lic.getLicenseOfCustomerId());
-//            licenceDTO.setLicenseName(lic.getLicenseName());
-//            licenceDTO.setStatus(lic.getStatus());
-//            licenceDTOs.add(licenceDTO);
-//        }
-//        customerDTO.setLicenceDTOS(licenceDTOs);
-//        return customerDTO;
-//    }
-
     @Override
     public CustomerDTO assignLicenceAndSetStatus(UUID customerId, UUID licenseID) {
+
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
 
         LicenseList licenseList = licenseListRepository.findById(licenseID)
                 .orElseThrow(() -> new RuntimeException("License not found with ID: " + licenseID));
 
-        LicenseOfCustomer licenseOfCustomer1 = new LicenseOfCustomer();
-        licenseOfCustomer1.setLicense(licenseList); // Ensure licenseList is never null
+        Optional<LicenseOfCustomer> existingLicense = licenseOfCustomerRepository.findByCustomerIdAndLicenseId(customerId, licenseID);
+        if (existingLicense.isPresent()) {
+            throw new RuntimeException("Customer already has this license with ID: " + licenseID);
+        }
 
+        LicenseOfCustomer licenseOfCustomer1 = new LicenseOfCustomer();
+        licenseOfCustomer1.setLicense(licenseList);
         licenseOfCustomer1.setCustomer(customer);
         licenseOfCustomer1.setLicenseName(licenseList.getLicenseName());
 
@@ -128,7 +93,6 @@ public class CustomerSerImpl implements ICustomer {
         return customerDTO;
     }
 
-
     @Override
     public CustomerDTO getCustomerWithLicenses(UUID customerId) {
 
@@ -146,6 +110,7 @@ public class CustomerSerImpl implements ICustomer {
         return customerDTO;
     }
 
+    @Override
     public List<CustomerDTO> getAllCustomers() {
         List<Customer> customers = customerRepository.findAll();
 
@@ -173,13 +138,13 @@ public class CustomerSerImpl implements ICustomer {
     public List<CustomerDTO> searchCustomerByName(String name) {
         List<Customer> foundCustomers = customerRepository.findByFirstNameContainingIgnoreCaseOrderByFirstNameAsc(name);
         System.out.println(foundCustomers.size());
-        // Convert List<Customer> to List<CustomerDTO> using ModelMapper
+
         List<CustomerDTO> customerDTOs = new ArrayList<>();
         for (Customer customer : foundCustomers) {
             CustomerDTO dto = modelMapper.map(customer, CustomerDTO.class);
             customerDTOs.add(dto);
         }
-        return customerDTOs; // Return the list of DTOs
+        return customerDTOs;
     }
 
     @Override
@@ -195,9 +160,7 @@ public class CustomerSerImpl implements ICustomer {
             customerList = customerRepository.findAll();
         }
 
-
         System.out.println("Number of customers found: " + customerList.size());
-
 
         return mapToDTOList(customerList);
     }
@@ -211,9 +174,46 @@ public class CustomerSerImpl implements ICustomer {
         return customerDTOList;
     }
 
+    @Override
+    public CustomerDTO UpdateCustomerDetail(UUID customerId, CustomerDTO customerDTO) {
+        Customer customer=customerRepository.findById(customerId).orElseThrow(()->new RuntimeException("Id Not Found"));
 
+        if(customerDTO.getFirstName()!=null){
+            customer.setFirstName(customerDTO.getFirstName());
+        }
+        if(customerDTO.getLastName()!=null){
+            customer.setLastName(customerDTO.getLastName());
+        }
+        if(customerDTO.getEmail()!=null){
+            customer.setEmail(customerDTO.getEmail());
+        }
+        if(customerDTO.getArea()!=null){
+            customer.setArea(customerDTO.getArea());
+        }
+        if (customerDTO.getMobileNumber()!=null){
+            customer.setMobileNumber(customerDTO.getMobileNumber());
+        }
+        if (customerDTO.getPincode()!=null){
+            customer.setPincode(customerDTO.getPincode());
+        }
+        if (customerDTO.getCity()!=null){
+            customer.setCity(customerDTO.getCity());
+        }
+        if(customerDTO.getState()!=null){
+            customer.setState(customerDTO.getState());
+        }
+        Customer savecustomer=customerRepository.save(customer);
+        return modelMapper.map(savecustomer,CustomerDTO.class);
+    }
 
+    @Override
+    public CustomerDTO deleteCustomer(UUID customerId) {
+        Customer customer= customerRepository.findById(customerId).
+                orElseThrow(()->new RuntimeException(" Id not Found"+customerId));
+        customerRepository.delete(customer);
 
+        return null;
+    }
 
 }
 

@@ -19,4 +19,8 @@ public interface ICustomer {
     List<CustomerDTO> searchCustomerByName(String name);
 
     List<CustomerDTO> getByFilter(String name, String area,String email);
+
+    CustomerDTO UpdateCustomerDetail(UUID customerId, CustomerDTO customerDTO);
+
+    CustomerDTO deleteCustomer(UUID customerId);
 }
