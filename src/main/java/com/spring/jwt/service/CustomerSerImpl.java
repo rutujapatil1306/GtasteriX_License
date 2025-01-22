@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -48,7 +49,6 @@ public class CustomerSerImpl implements ICustomer {
         return modelMapper.map(customer1, CustomerDTO.class);
     }
 
-
     @Override
     public CustomerDTO assignLicenceAndSetStatus(UUID customerId, UUID licenseID) {
 
@@ -57,6 +57,11 @@ public class CustomerSerImpl implements ICustomer {
 
         LicenseList licenseList = licenseListRepository.findById(licenseID)
                 .orElseThrow(() -> new RuntimeException("License not found with ID: " + licenseID));
+
+        Optional<LicenseOfCustomer> existingLicense = licenseOfCustomerRepository.findByCustomerIdAndLicenseId(customerId, licenseID);
+        if (existingLicense.isPresent()) {
+            throw new RuntimeException("Customer already has this license with ID: " + licenseID);
+        }
 
         LicenseOfCustomer licenseOfCustomer1 = new LicenseOfCustomer();
         licenseOfCustomer1.setLicense(licenseList);
@@ -105,6 +110,7 @@ public class CustomerSerImpl implements ICustomer {
         return customerDTO;
     }
 
+    @Override
     public List<CustomerDTO> getAllCustomers() {
         List<Customer> customers = customerRepository.findAll();
 
@@ -132,13 +138,13 @@ public class CustomerSerImpl implements ICustomer {
     public List<CustomerDTO> searchCustomerByName(String name) {
         List<Customer> foundCustomers = customerRepository.findByFirstNameContainingIgnoreCaseOrderByFirstNameAsc(name);
         System.out.println(foundCustomers.size());
-        // Convert List<Customer> to List<CustomerDTO> using ModelMapper
+
         List<CustomerDTO> customerDTOs = new ArrayList<>();
         for (Customer customer : foundCustomers) {
             CustomerDTO dto = modelMapper.map(customer, CustomerDTO.class);
             customerDTOs.add(dto);
         }
-        return customerDTOs; // Return the list of DTOs
+        return customerDTOs;
     }
 
     @Override
@@ -154,9 +160,7 @@ public class CustomerSerImpl implements ICustomer {
             customerList = customerRepository.findAll();
         }
 
-
         System.out.println("Number of customers found: " + customerList.size());
-
 
         return mapToDTOList(customerList);
     }
@@ -207,6 +211,7 @@ public class CustomerSerImpl implements ICustomer {
         Customer customer= customerRepository.findById(customerId).
                 orElseThrow(()->new RuntimeException(" Id not Found"+customerId));
         customerRepository.delete(customer);
+
         return null;
     }
 

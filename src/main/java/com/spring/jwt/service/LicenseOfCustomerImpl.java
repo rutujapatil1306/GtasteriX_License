@@ -83,14 +83,9 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
 //    }
 
     public CustomerDTO updateStatus(UUID licenseOfCustomerId, String status) {
-        System.out.println("Updating status for LicenseOfCustomerId: " + licenseOfCustomerId + " to " + status);
-
 
         LicenseOfCustomer licenseOfCustomer = licenseOfCustomerRepository.findById(licenseOfCustomerId)
                 .orElseThrow(() -> new RuntimeException("Licence not found with ID: " + licenseOfCustomerId));
-
-        System.out.println("Current status: " + licenseOfCustomer.getStatus());
-
 
         Status newStatus;
         try {
@@ -117,9 +112,7 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
                 throw new RuntimeException("Unknown current status: " + licenseOfCustomer.getStatus());
         }
 
-
         licenseOfCustomer.setStatus(newStatus);
-
 
         if (newStatus == Status.ACTIVE) {
             licenseOfCustomer.setIssueDate(LocalDate.now());
