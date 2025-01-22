@@ -14,9 +14,16 @@ public class CustomerDTO {
 
     private UUID customerId;
 
+
+
     @NotBlank(message = "Name is required.")
     @Size(max = 50, message = "Name must not exceed 50 characters.")
-    private String name;
+    private String firstName;
+
+
+    @NotBlank(message = "Name is required.")
+    @Size(max = 50, message = "Name must not exceed 50 characters.")
+    private  String lastName;
 
     @NotBlank(message = "Mobile number is required.")
     @Pattern(regexp = "^[0-9]{10}$", message = "Mobile number must be exactly 10 digits.")
@@ -25,6 +32,8 @@ public class CustomerDTO {
     @NotBlank(message = "Email is required.")
     @Email(message = "Email must be a valid format.")
     private String email;
+
+    private String state;
 
     private String city;
 
