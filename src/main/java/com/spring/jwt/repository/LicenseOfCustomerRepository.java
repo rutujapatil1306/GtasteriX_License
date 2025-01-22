@@ -10,9 +10,9 @@ import java.util.UUID;
 @Repository
 public interface LicenseOfCustomerRepository extends JpaRepository<LicenseOfCustomer, UUID> {
 
+    List<LicenseOfCustomer> findByLicense_LicenseID(UUID licenseID);
 
-
-    LicenseOfCustomer getById(UUID licenseOfCustomerId);
+  // List<LicenseOfCustomer> getByLicenceId(UUID licenseOfListId);
 
     List<LicenseOfCustomer> findByStatus(Enum status);
 }
