@@ -60,20 +60,20 @@ public class LicenseListImpl implements ILicenseList {
     @Transactional
     @Override
     public void deleteLicenseById(UUID licenseListID) {
-        // Fetch the license from LicenseList
+
         LicenseList license = licenseListRepository.findById(licenseListID)
                 .orElseThrow(() -> new RuntimeException("License not found with ID: " + licenseListID));
 
-        // Fetch all LicenseOfCustomer entities associated with this license
+
         List<LicenseOfCustomer> licenseOfCustomers = repository.findByLicense_LicenseID(licenseListID);
 
-        // Nullify the reference between `LicenseOfCustomer` and `LicenseList`
+
         for (LicenseOfCustomer licenseOfCustomer : licenseOfCustomers) {
-            licenseOfCustomer.setLicense(null);  // Remove the reference to LicenseList
+            licenseOfCustomer.setLicense(null);
             repository.save(licenseOfCustomer);
         }
 
-        // Now delete the license from the LicenseList table
+
         licenseListRepository.delete(license);
     }
 
