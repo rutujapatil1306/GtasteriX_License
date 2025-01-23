@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -161,6 +160,17 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
 
     }
 
+    @Override
+    public List<CustomerDTO> CustomerLicenseListAndStatus(UUID licenseId) {
+        List<LicenseOfCustomer> licenseOfCustomers= licenseOfCustomerRepository.findByLicense_LicenseID(licenseId);
+        List<CustomerDTO> customerDTOList=  new ArrayList<>();
+
+        for(LicenseOfCustomer licenseOfCustomer : licenseOfCustomers){
+            CustomerDTO customerDTO= modelMapper.map(licenseOfCustomer.getCustomer(),CustomerDTO.class);
+            customerDTOList.add(customerDTO);
+        }
+        return customerDTOList;
+    }
 
 
 }

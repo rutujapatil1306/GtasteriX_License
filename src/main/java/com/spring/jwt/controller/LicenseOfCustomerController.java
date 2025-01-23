@@ -3,6 +3,7 @@ package com.spring.jwt.controller;
 import com.spring.jwt.Interfaces.ILicenseOfCustomer;
 import com.spring.jwt.dto.CustomerDTO;
 import com.spring.jwt.dto.LicenseOfCustomerDTO;
+import com.spring.jwt.entity.Status;
 import com.spring.jwt.utils.BaseResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -70,5 +71,18 @@ public class LicenseOfCustomerController {
         }
     }
 
+    @GetMapping("/CustomerLicenseListAndStatus")
+    public ResponseEntity<BaseResponseDTO> CustomerLicenseListAndStatus(@RequestParam UUID licenseId){
+     try{
+         List<CustomerDTO> assignCustomerList= iLicenseOfCustomer.CustomerLicenseListAndStatus(licenseId);
+         BaseResponseDTO responseDTO=new BaseResponseDTO(assignCustomerList,"All Ok","List Of License Assigned Customer Successfully Retrived");
+         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+     }catch (Exception e){
+         BaseResponseDTO responseDTO=new BaseResponseDTO(e.getMessage(),"ERROR","Faild to retrived Data");
+         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDTO);
+     }
+
+
+    }
 
 }
