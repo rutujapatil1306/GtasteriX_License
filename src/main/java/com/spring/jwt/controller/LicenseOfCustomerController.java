@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
+@CrossOrigin
 @RequestMapping("api/licenseOfCustomerController")
 
 public class LicenseOfCustomerController {
@@ -37,7 +38,7 @@ public class LicenseOfCustomerController {
         } catch (Exception e) {
             System.err.println("Unexpected error: " + e.getMessage());
 
-            BaseResponseDTO errorResponse = new BaseResponseDTO("An unexpected error occurred", "Error", "Status Not updated");
+            BaseResponseDTO errorResponse = new BaseResponseDTO("An unexpected error occurred", "Error", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
@@ -55,7 +56,19 @@ public class LicenseOfCustomerController {
         }
     }
 
+    @GetMapping("/getAllLicenseOfCustomer")
+    public ResponseEntity<BaseResponseDTO> getAllLicenseOfCustomer() {
+        try {
+            List<LicenseOfCustomerDTO> allLicenses = iLicenseOfCustomer.getAllLicenseOfCustomer();
 
+            BaseResponseDTO response = new BaseResponseDTO(allLicenses, "ALL OK", "All LicenseOfCustomer fetched successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (Exception e) {
+            BaseResponseDTO errorResponse = new BaseResponseDTO(
+                    e.getMessage(), "Error", "Unable to fetch LicenseOfCustomer");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
 
 
 }

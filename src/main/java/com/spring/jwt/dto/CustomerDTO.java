@@ -1,5 +1,6 @@
 package com.spring.jwt.dto;
 
+import com.spring.jwt.entity.isPresent;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -41,7 +42,9 @@ public class CustomerDTO {
 
     private String pincode;
 
-    private List<LicenseOfCustomerDTO> licenceDTOS;
+    private isPresent present;
+
+    private List<LicenseOfCustomerDTO> licenseOfCustomerDTOS;
 }
 
 

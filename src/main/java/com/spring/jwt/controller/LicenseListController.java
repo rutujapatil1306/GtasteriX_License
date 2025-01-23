@@ -13,6 +13,7 @@ import java.util.UUID;
 
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/licenseList")
 public class LicenseListController {
 
@@ -59,7 +60,7 @@ private ILicenseList iLicenseList;
         }
     }
 
-    @DeleteMapping("/deleteLicenseList")
+    @DeleteMapping("/deleteLicenseListByID")
     public ResponseEntity<BaseResponseDTO> deleteLicenseList(@RequestParam UUID licenseListID) {
         try {
             iLicenseList.deleteLicenseById(licenseListID);

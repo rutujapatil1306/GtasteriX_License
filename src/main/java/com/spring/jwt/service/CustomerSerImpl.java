@@ -3,10 +3,7 @@ package com.spring.jwt.service;
 import com.spring.jwt.Interfaces.ICustomer;
 import com.spring.jwt.dto.CustomerDTO;
 import com.spring.jwt.dto.LicenseOfCustomerDTO;
-import com.spring.jwt.entity.Customer;
-import com.spring.jwt.entity.LicenseList;
-import com.spring.jwt.entity.LicenseOfCustomer;
-import com.spring.jwt.entity.Status;
+import com.spring.jwt.entity.*;
 import com.spring.jwt.repository.CustomerRepository;
 import com.spring.jwt.repository.LicenseListRepository;
 import com.spring.jwt.repository.LicenseOfCustomerRepository;
@@ -16,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -44,10 +42,10 @@ public class CustomerSerImpl implements ICustomer {
                 }
             }
         }
+        customer.setPresent(isPresent.ACTIVE);
         Customer customer1 = customerRepository.save(customer);
         return modelMapper.map(customer1, CustomerDTO.class);
     }
-
 
     @Override
     public CustomerDTO assignLicenceAndSetStatus(UUID customerId, UUID licenseID) {
@@ -55,8 +53,21 @@ public class CustomerSerImpl implements ICustomer {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
 
+
         LicenseList licenseList = licenseListRepository.findById(licenseID)
                 .orElseThrow(() -> new RuntimeException("License not found with ID: " + licenseID));
+
+        if(customer.getPresent()==isPresent.INACTIVE){
+            throw new RuntimeException("Customer is Inactive");
+        }
+        if(licenseList.getPresent() == isPresent.INACTIVE){
+            throw new RuntimeException("License  is Inactive");
+        }
+
+        Optional<LicenseOfCustomer> existingLicense = licenseOfCustomerRepository.findByCustomerIdAndLicenseId(customerId, licenseID);
+        if (existingLicense.isPresent()) {
+            throw new RuntimeException("Customer already has this license with ID: " + licenseID);
+        }
 
         LicenseOfCustomer licenseOfCustomer1 = new LicenseOfCustomer();
         licenseOfCustomer1.setLicense(licenseList);
@@ -84,7 +95,7 @@ public class CustomerSerImpl implements ICustomer {
             licenceDTO.setStatus(lic.getStatus());
             licenceDTOs.add(licenceDTO);
         }
-        customerDTO.setLicenceDTOS(licenceDTOs);
+        customerDTO.setLicenseOfCustomerDTOS(licenceDTOs);
         return customerDTO;
     }
 
@@ -105,6 +116,7 @@ public class CustomerSerImpl implements ICustomer {
         return customerDTO;
     }
 
+    @Override
     public List<CustomerDTO> getAllCustomers() {
         List<Customer> customers = customerRepository.findAll();
 
@@ -119,7 +131,7 @@ public class CustomerSerImpl implements ICustomer {
                 licenceDTOs.add(licenceDTO);
             }
 
-            customerDTO.setLicenceDTOS(licenceDTOs);
+            customerDTO.setLicenseOfCustomerDTOS(licenceDTOs);
             customerDTOs.add(customerDTO);
         }
 
@@ -132,13 +144,13 @@ public class CustomerSerImpl implements ICustomer {
     public List<CustomerDTO> searchCustomerByName(String name) {
         List<Customer> foundCustomers = customerRepository.findByFirstNameContainingIgnoreCaseOrderByFirstNameAsc(name);
         System.out.println(foundCustomers.size());
-        // Convert List<Customer> to List<CustomerDTO> using ModelMapper
+
         List<CustomerDTO> customerDTOs = new ArrayList<>();
         for (Customer customer : foundCustomers) {
             CustomerDTO dto = modelMapper.map(customer, CustomerDTO.class);
             customerDTOs.add(dto);
         }
-        return customerDTOs; // Return the list of DTOs
+        return customerDTOs;
     }
 
     @Override
@@ -154,9 +166,7 @@ public class CustomerSerImpl implements ICustomer {
             customerList = customerRepository.findAll();
         }
 
-
         System.out.println("Number of customers found: " + customerList.size());
-
 
         return mapToDTOList(customerList);
     }
@@ -207,6 +217,7 @@ public class CustomerSerImpl implements ICustomer {
         Customer customer= customerRepository.findById(customerId).
                 orElseThrow(()->new RuntimeException(" Id not Found"+customerId));
         customerRepository.delete(customer);
+
         return null;
     }
 

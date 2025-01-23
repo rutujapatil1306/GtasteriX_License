@@ -48,6 +48,9 @@ public class Customer {
     @Column
     private String state;
 
+    @Column
+    private isPresent present;
+
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<LicenseOfCustomer> licence;

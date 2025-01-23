@@ -3,8 +3,14 @@ package com.spring.jwt.service;
 
 import com.spring.jwt.Interfaces.ILicenseList;
 import com.spring.jwt.dto.LicenseListDTO;
+import com.spring.jwt.entity.Customer;
 import com.spring.jwt.entity.LicenseList;
+import com.spring.jwt.entity.LicenseOfCustomer;
+import com.spring.jwt.entity.isPresent;
+import com.spring.jwt.repository.CustomerRepository;
 import com.spring.jwt.repository.LicenseListRepository;
+import com.spring.jwt.repository.LicenseOfCustomerRepository;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,10 +28,17 @@ public class LicenseListImpl implements ILicenseList {
     @Autowired
     private LicenseListRepository licenseListRepository;
 
+    @Autowired
+   private LicenseOfCustomerRepository repository;
+
+    @Autowired
+    private CustomerRepository customerRepo;
+
     @Override
     public LicenseListDTO saveLicense(LicenseListDTO licenseListDTO)
     {
         LicenseList licenseList = modelMapper.map(licenseListDTO, LicenseList.class);
+        licenseList.setPresent(isPresent.ACTIVE);
         LicenseList saveLicense = licenseListRepository.save(licenseList);
         return modelMapper.map(licenseList, LicenseListDTO.class);
     }
@@ -44,12 +57,35 @@ public class LicenseListImpl implements ILicenseList {
 
 
 
+
+
+
+    @Transactional
     @Override
     public void deleteLicenseById(UUID licenseListID) {
+
         LicenseList license = licenseListRepository.findById(licenseListID)
-                .orElseThrow(() -> new RuntimeException("License with ID " + licenseListID + "Deleted"));
+                .orElseThrow(() -> new RuntimeException("License not found with ID: " + licenseListID));
+
+
+        List<LicenseOfCustomer> licenseOfCustomers = repository.findByLicense_LicenseID(licenseListID);
+
+
+        for (LicenseOfCustomer licenseOfCustomer : licenseOfCustomers) {
+            licenseOfCustomer.setLicense(null);
+            repository.save(licenseOfCustomer);
+        }
+
+
         licenseListRepository.delete(license);
     }
+
+
+
+
+
+
+
 
     @Override
     public LicenseListDTO getLicenseListByID(UUID licenseID) {
