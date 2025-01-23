@@ -11,8 +11,10 @@ import com.spring.jwt.entity.Status;
 
 import com.spring.jwt.repository.CustomerRepository;
 import com.spring.jwt.repository.LicenseOfCustomerRepository;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -81,7 +83,7 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
 //
 //        return customerDTO;
 //    }
-
+     @Transactional
     public CustomerDTO updateStatus(UUID licenseOfCustomerId, String status) {
         System.out.println("Updating status for LicenseOfCustomerId: " + licenseOfCustomerId + " to " + status);
 
@@ -90,7 +92,6 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
                 .orElseThrow(() -> new RuntimeException("Licence not found with ID: " + licenseOfCustomerId));
 
         System.out.println("Current status: " + licenseOfCustomer.getStatus());
-
 
         Status newStatus;
         try {
@@ -117,9 +118,7 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
                 throw new RuntimeException("Unknown current status: " + licenseOfCustomer.getStatus());
         }
 
-
         licenseOfCustomer.setStatus(newStatus);
-
 
         if (newStatus == Status.ACTIVE) {
             licenseOfCustomer.setIssueDate(LocalDate.now());
@@ -129,8 +128,6 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
             }
             licenseOfCustomer.setExpiryDate(LocalDate.now().plusYears(licenseList.getValidTill()));
         }
-
-
         licenseOfCustomerRepository.save(licenseOfCustomer);
 
         // Map customer to DTO
@@ -159,8 +156,29 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
         return li;
     }
 
+    @Scheduled(fixedRate = 60000)  // This cron expression runs the method every day at midnight
+    public void updateExpiredLicenses() {
+        // Get the current date
+        LocalDate today = LocalDate.now();
 
+        // Find all active licenses with expiry date less than today's date
+        List<LicenseOfCustomer> expiredLicenses = licenseOfCustomerRepository.findByStatusAndExpiryDateBefore(Status.ACTIVE, today);
+
+        for (LicenseOfCustomer licenseOfCustomer : expiredLicenses) {
+            // Check if the license has expired
+            if (licenseOfCustomer.getExpiryDate().isBefore(today)) {
+                // Change the status from ACTIVE to RENEW
+                licenseOfCustomer.setStatus(Status.RENEW);
+                licenseOfCustomerRepository.save(licenseOfCustomer);
+
+                // Optionally, send a notification to the customer or perform other actions
+                System.out.println("License with ID: " + licenseOfCustomer.getLicenseOfCustomerId() + " has been renewed.");
+            }
+        }
+    }
 
 }
+
+
 
 
