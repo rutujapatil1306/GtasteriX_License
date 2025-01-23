@@ -3,10 +3,7 @@ package com.spring.jwt.service;
 import com.spring.jwt.Interfaces.ICustomer;
 import com.spring.jwt.dto.CustomerDTO;
 import com.spring.jwt.dto.LicenseOfCustomerDTO;
-import com.spring.jwt.entity.Customer;
-import com.spring.jwt.entity.LicenseList;
-import com.spring.jwt.entity.LicenseOfCustomer;
-import com.spring.jwt.entity.Status;
+import com.spring.jwt.entity.*;
 import com.spring.jwt.repository.CustomerRepository;
 import com.spring.jwt.repository.LicenseListRepository;
 import com.spring.jwt.repository.LicenseOfCustomerRepository;
@@ -45,6 +42,7 @@ public class CustomerSerImpl implements ICustomer {
                 }
             }
         }
+        customer.setPresent(isPresent.ACTIVE);
         Customer customer1 = customerRepository.save(customer);
         return modelMapper.map(customer1, CustomerDTO.class);
     }
@@ -55,8 +53,16 @@ public class CustomerSerImpl implements ICustomer {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
 
+
         LicenseList licenseList = licenseListRepository.findById(licenseID)
                 .orElseThrow(() -> new RuntimeException("License not found with ID: " + licenseID));
+
+        if(customer.getPresent()==isPresent.INACTIVE){
+            throw new RuntimeException("Customer is Inactive");
+        }
+        if(licenseList.getPresent() == isPresent.INACTIVE){
+            throw new RuntimeException("License  is Inactive");
+        }
 
         Optional<LicenseOfCustomer> existingLicense = licenseOfCustomerRepository.findByCustomerIdAndLicenseId(customerId, licenseID);
         if (existingLicense.isPresent()) {

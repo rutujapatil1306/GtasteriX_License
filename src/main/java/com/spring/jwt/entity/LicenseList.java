@@ -20,4 +20,6 @@ public class LicenseList {
     @Column(nullable = false)
     private Integer validTill;
 
+
+    private isPresent present;
 }
