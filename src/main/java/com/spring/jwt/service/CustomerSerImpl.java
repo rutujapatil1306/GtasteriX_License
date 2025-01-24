@@ -2,6 +2,7 @@ package com.spring.jwt.service;
 
 import com.spring.jwt.Interfaces.ICustomer;
 import com.spring.jwt.dto.CustomerDTO;
+import com.spring.jwt.dto.LicenseListDTO;
 import com.spring.jwt.dto.LicenseOfCustomerDTO;
 import com.spring.jwt.entity.*;
 import com.spring.jwt.repository.CustomerRepository;
@@ -42,7 +43,7 @@ public class CustomerSerImpl implements ICustomer {
                 }
             }
         }
-        customer.setPresent(isPresent.ACTIVE);
+        customer.setPresent(isPresent.AVAILABLE);
         Customer customer1 = customerRepository.save(customer);
         return modelMapper.map(customer1, CustomerDTO.class);
     }
@@ -57,10 +58,10 @@ public class CustomerSerImpl implements ICustomer {
         LicenseList licenseList = licenseListRepository.findById(licenseID)
                 .orElseThrow(() -> new RuntimeException("License not found with ID: " + licenseID));
 
-        if(customer.getPresent()==isPresent.INACTIVE){
+        if(customer.getPresent()==isPresent.UNAVAILABLE){
             throw new RuntimeException("Customer is Inactive");
         }
-        if(licenseList.getPresent() == isPresent.INACTIVE){
+        if(licenseList.getPresent() == isPresent.UNAVAILABLE){
             throw new RuntimeException("License  is Inactive");
         }
 
@@ -220,6 +221,33 @@ public class CustomerSerImpl implements ICustomer {
 
         return null;
     }
+
+    @Override
+    public CustomerDTO updateEnum(UUID licenseId, String present) {
+
+        isPresent availability;
+        try {
+            availability = isPresent.valueOf(present.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid value for 'present': " + present);
+        }
+
+
+        Customer list = customerRepository.findById(licenseId)
+                .orElseThrow(() -> new RuntimeException("License with ID " + licenseId + " Not Found"));
+
+
+        if (list.getPresent() == isPresent.AVAILABLE) {
+            list.setPresent(isPresent.UNAVAILABLE);
+        } else {
+            list.setPresent(isPresent.AVAILABLE);
+        }
+
+
+        list = customerRepository.save(list);
+        return modelMapper.map(list, CustomerDTO.class);
+    }
+
 
 }
 

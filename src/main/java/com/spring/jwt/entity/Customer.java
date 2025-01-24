@@ -48,7 +48,7 @@ public class Customer {
     @Column
     private String state;
 
-    @Column
+    @Enumerated(EnumType.STRING)
     private isPresent present;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)

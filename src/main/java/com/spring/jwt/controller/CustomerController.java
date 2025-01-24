@@ -2,6 +2,8 @@ package com.spring.jwt.controller;
 
 import com.spring.jwt.Interfaces.ICustomer;
 import com.spring.jwt.dto.CustomerDTO;
+import com.spring.jwt.dto.LicenseListDTO;
+import com.spring.jwt.entity.Customer;
 import com.spring.jwt.exception.BaseException;
 import com.spring.jwt.utils.BaseResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +30,7 @@ public class CustomerController {
             return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
         }
         catch(Exception e){
-            BaseResponseDTO errorResponseDTO = new BaseResponseDTO( e.getMessage(),"ERROR", "List of License not Found: ");
+            BaseResponseDTO errorResponseDTO = new BaseResponseDTO( e.getMessage(),"ERROR", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponseDTO);
         }
 
@@ -122,6 +124,20 @@ public class CustomerController {
         }
     }
 
+    @PatchMapping("/updateCustomerStatus")
+    public ResponseEntity<BaseResponseDTO> updateEnum(@RequestParam UUID customerId,@RequestParam String present){
+        try{
+            CustomerDTO dto=icustomer.updateEnum(customerId,present);
+            BaseResponseDTO responseDTO=new BaseResponseDTO(dto,"SUCCESS","Licence Update Successfully");
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
 
+        }
+
+        catch(Exception e){
+            BaseResponseDTO err=new BaseResponseDTO(e.getMessage(),"ERROR","Licence not updated Successfully");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
+
+        }
+    }
 
 }

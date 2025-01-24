@@ -71,4 +71,19 @@ private ILicenseList iLicenseList;
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
+    @PatchMapping("/updateLicenseStatus")
+    public ResponseEntity<BaseResponseDTO> updateEnum(@RequestParam UUID licenseId,@RequestParam String present){
+        try{
+            LicenseListDTO dto=iLicenseList.updateEnum(licenseId,present);
+            BaseResponseDTO responseDTO=new BaseResponseDTO(dto,"SUCCESS","Licence Update Successfully");
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
+
+        }
+
+        catch(Exception e){
+            BaseResponseDTO err=new BaseResponseDTO(e.getMessage(),"ERROR","Licence not updated Successfully");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
+
+        }
+    }
 }

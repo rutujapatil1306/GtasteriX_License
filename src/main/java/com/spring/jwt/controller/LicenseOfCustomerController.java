@@ -2,14 +2,18 @@ package com.spring.jwt.controller;
 
 import com.spring.jwt.Interfaces.ILicenseOfCustomer;
 import com.spring.jwt.dto.CustomerDTO;
+import com.spring.jwt.dto.FilterDto;
+import com.spring.jwt.dto.LicenseListDTO;
 import com.spring.jwt.dto.LicenseOfCustomerDTO;
 import com.spring.jwt.entity.Status;
+import com.spring.jwt.exception.PageNotFoundException;
 import com.spring.jwt.utils.BaseResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -71,16 +75,44 @@ public class LicenseOfCustomerController {
         }
     }
 
-    @GetMapping("/CustomerLicenseListAndStatus")
-    public ResponseEntity<BaseResponseDTO> CustomerLicenseListAndStatus(@RequestParam UUID licenseId, @RequestParam(required = false) Status status){
-     try{
-         List<CustomerDTO> assignCustomerList= iLicenseOfCustomer.CustomerLicenseListAndStatus(licenseId,status);
-         BaseResponseDTO responseDTO=new BaseResponseDTO(assignCustomerList,"All Ok","List Of License Assigned Customer Successfully Retrived");
-         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-     }catch (Exception e){
-         BaseResponseDTO responseDTO=new BaseResponseDTO(e.getMessage(),"ERROR","Faild to retrived Data");
-         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDTO);
-     }
+    @GetMapping("/anyFilterApi")
+    public ResponseEntity<BaseResponseDTO> getByAllFilter(
+                                                          @RequestParam(required = false) String licenceName,
+                                                          @RequestParam(required = false) String status,
+                                                          @RequestParam(required = false) LocalDate issueDate,
+                                                          @RequestParam(required = false) LocalDate expiryDate,
+                                                          @RequestParam(required = false) CustomerDTO customerDTO,
+                                                          @RequestParam(required = false) LicenseListDTO licenseListDTO,
+                                                          @RequestParam (defaultValue = "1") Integer pageNo,
+                                                          @RequestParam (defaultValue = "20")Integer pageSize){
+
+        FilterDto license;
+        Status k;
+    try{
+    k= Status.valueOf(status.toUpperCase());
+        license=new FilterDto(licenceName,k,issueDate,expiryDate,customerDTO,licenseListDTO);
+
+    }
+    catch(Exception e){
+        BaseResponseDTO errorResponse = new BaseResponseDTO("An unexpected error occurred", "Error", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+
+    }
+
+        try {
+            List<LicenseOfCustomerDTO> listOfCar = iLicenseOfCustomer.searchByFilterPage(license, pageNo, pageSize);
+            BaseResponseDTO responseAllCarDto = new BaseResponseDTO(listOfCar, "ALL OK", "All LicenseOfCustomer fetched successfully");
+
+            return ResponseEntity.status(HttpStatus.OK).body(responseAllCarDto);
+        } catch (PageNotFoundException pageNotFoundException) {
+            BaseResponseDTO responseAllCarDto = new BaseResponseDTO( "An unexpected error occurred", "Error", pageNotFoundException.getMessage());;
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseAllCarDto);
+        } catch (Exception e) {
+            BaseResponseDTO responseAllCarDto = new BaseResponseDTO("An unexpected error occurred", "Error", e.getMessage());;
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseAllCarDto);
+        }
+
 
 
     }
