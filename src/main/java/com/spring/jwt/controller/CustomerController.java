@@ -124,7 +124,7 @@ public class CustomerController {
         }
     }
 
-    @PatchMapping("/patch")
+    @PatchMapping("/updateCustomerStatus")
     public ResponseEntity<BaseResponseDTO> updateEnum(@RequestParam UUID customerId,@RequestParam String present){
         try{
             CustomerDTO dto=icustomer.updateEnum(customerId,present);

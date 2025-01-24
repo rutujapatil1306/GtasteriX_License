@@ -71,7 +71,7 @@ private ILicenseList iLicenseList;
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
-    @PatchMapping("/patch")
+    @PatchMapping("/updateLicenseStatus")
     public ResponseEntity<BaseResponseDTO> updateEnum(@RequestParam UUID licenseId,@RequestParam String present){
         try{
             LicenseListDTO dto=iLicenseList.updateEnum(licenseId,present);
