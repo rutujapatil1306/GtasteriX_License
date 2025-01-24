@@ -20,6 +20,6 @@ public class LicenseList {
     @Column(nullable = false)
     private Integer validTill;
 
-
+    @Enumerated(EnumType.STRING)
     private isPresent present;
 }

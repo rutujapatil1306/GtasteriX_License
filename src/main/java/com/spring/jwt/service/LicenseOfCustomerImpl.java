@@ -2,6 +2,7 @@ package com.spring.jwt.service;
 
 import com.spring.jwt.Interfaces.ILicenseOfCustomer;
 import com.spring.jwt.dto.CustomerDTO;
+import com.spring.jwt.dto.FilterDto;
 import com.spring.jwt.dto.LicenseListDTO;
 import com.spring.jwt.dto.LicenseOfCustomerDTO;
 import com.spring.jwt.entity.Customer;
@@ -9,10 +10,16 @@ import com.spring.jwt.entity.LicenseList;
 import com.spring.jwt.entity.LicenseOfCustomer;
 import com.spring.jwt.entity.Status;
 
+import com.spring.jwt.exception.PageNotFoundException;
 import com.spring.jwt.repository.CustomerRepository;
 import com.spring.jwt.repository.LicenseOfCustomerRepository;
+import jakarta.persistence.criteria.Predicate;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -161,6 +168,68 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
 
     }
 
+    @Override
+    public List<LicenseOfCustomerDTO> searchByFilterPage(FilterDto filterDto, Integer pageNo, Integer pageSize) {
+        Specification<LicenseOfCustomer> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Filtering by license name
+            if (filterDto.getLicenseName() != null && !filterDto.getLicenseName().isEmpty()) {
+                predicates.add(criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("licenseName")),
+                        "%" + filterDto.getLicenseName().toLowerCase() + "%"
+                ));
+            }
+
+            // Filtering by status
+            if (filterDto.getStatus() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("status"), filterDto.getStatus()));
+            }
+
+            // Filtering by issue date
+            if (filterDto.getIssueDate() != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("issueDate"), filterDto.getIssueDate()));
+            }
+
+            // Filtering by expiry date
+            if (filterDto.getExpiryDate() != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("expiryDate"), filterDto.getExpiryDate()));
+            }
+
+            // Filtering by customer details (if applicable)
+            if (filterDto.getCustomer() != null && filterDto.getCustomer().getCustomerId() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("customer").get("id"), filterDto.getCustomer().getCustomerId()));
+            }
+            Predicate statusPredicate = criteriaBuilder.or(
+                    criteriaBuilder.equal(root.get("status"), Status.ACTIVE),
+                    criteriaBuilder.equal(root.get("status"), Status.PENDING)
+                   // criteriaBuilder.equal(root.get)
+            );
+
+            // Query sorting by most recent license ID
+            query.orderBy(criteriaBuilder.desc(root.get("id")));
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        // Create pageable object
+        Pageable pageable = PageRequest.of(pageNo - 1, pageSize); // Convert to zero-based index for page number
+
+        // Fetch filtered data from repository
+        Page<LicenseOfCustomer> licensePage = licenseOfCustomerRepository.findAll(spec, pageable);
+
+        // Check if the result is empty
+        if (licensePage.isEmpty()) {
+            throw new PageNotFoundException("No licenses found for the specified filter and page.");
+        }
+
+        // Convert entity to DTO and return
+        List<LicenseOfCustomerDTO> licenseDtoList = licensePage.stream()
+                .map(LicenseOfCustomerDTO::new)
+                .toList();
+
+        return licenseDtoList;
+    }
 
 
 }

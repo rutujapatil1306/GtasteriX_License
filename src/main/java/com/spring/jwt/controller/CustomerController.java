@@ -28,7 +28,7 @@ public class CustomerController {
             return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
         }
         catch(Exception e){
-            BaseResponseDTO errorResponseDTO = new BaseResponseDTO( e.getMessage(),"ERROR", "List of License not Found: ");
+            BaseResponseDTO errorResponseDTO = new BaseResponseDTO( e.getMessage(),"ERROR", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponseDTO);
         }
 

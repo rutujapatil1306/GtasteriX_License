@@ -38,7 +38,7 @@ public class LicenseListImpl implements ILicenseList {
     public LicenseListDTO saveLicense(LicenseListDTO licenseListDTO)
     {
         LicenseList licenseList = modelMapper.map(licenseListDTO, LicenseList.class);
-        licenseList.setPresent(isPresent.ACTIVE);
+        licenseList.setPresent(isPresent.AVAILABLE);
         LicenseList saveLicense = licenseListRepository.save(licenseList);
         return modelMapper.map(licenseList, LicenseListDTO.class);
     }
