@@ -2,6 +2,7 @@ package com.spring.jwt.service;
 
 import com.spring.jwt.Interfaces.ICustomer;
 import com.spring.jwt.dto.CustomerDTO;
+import com.spring.jwt.dto.LicenseListDTO;
 import com.spring.jwt.dto.LicenseOfCustomerDTO;
 import com.spring.jwt.entity.*;
 import com.spring.jwt.repository.CustomerRepository;
@@ -220,6 +221,33 @@ public class CustomerSerImpl implements ICustomer {
 
         return null;
     }
+
+    @Override
+    public CustomerDTO updateEnum(UUID licenseId, String present) {
+
+        isPresent availability;
+        try {
+            availability = isPresent.valueOf(present.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid value for 'present': " + present);
+        }
+
+
+        Customer list = customerRepository.findById(licenseId)
+                .orElseThrow(() -> new RuntimeException("License with ID " + licenseId + " Not Found"));
+
+
+        if (list.getPresent() == isPresent.AVAILABLE) {
+            list.setPresent(isPresent.UNAVAILABLE);
+        } else {
+            list.setPresent(isPresent.AVAILABLE);
+        }
+
+
+        list = customerRepository.save(list);
+        return modelMapper.map(list, CustomerDTO.class);
+    }
+
 
 }
 
