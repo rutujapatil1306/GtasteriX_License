@@ -1,13 +1,18 @@
 package com.spring.jwt.dto;
 
 import com.spring.jwt.entity.LicenseList;
+import com.spring.jwt.entity.LicenseOfCustomer;
 import com.spring.jwt.entity.Status;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@ToString
 public class LicenseOfCustomerDTO {
 
         private UUID licenseOfCustomerId;
@@ -23,6 +28,10 @@ public class LicenseOfCustomerDTO {
        private CustomerDTO customer;
 
         private LicenseListDTO licenseList;
+
+
+    public LicenseOfCustomerDTO(LicenseOfCustomer licenseOfCustomer) {
     }
+}
 
 
