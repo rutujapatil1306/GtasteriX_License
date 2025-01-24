@@ -16,7 +16,7 @@ public interface ILicenseOfCustomer {
 
     List<LicenseOfCustomerDTO> getAllLicenseOfCustomer();
 
-    List<CustomerDTO> CustomerLicenseListAndStatus(UUID licenseId);
+    List<CustomerDTO> CustomerLicenseListAndStatus(UUID licenseId, Status status);
 
 
 }

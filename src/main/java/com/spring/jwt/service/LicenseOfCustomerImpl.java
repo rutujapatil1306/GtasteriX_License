@@ -122,8 +122,6 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
     }
 
 
-
-
     @Override
     public List<LicenseOfCustomerDTO> findByStatus(String status) {
         Status st = Status.valueOf(status.toUpperCase());
@@ -156,28 +154,21 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
             licenseOfCustomerDTOs.add(licenseDTO);
 
         }
-            return licenseOfCustomerDTOs;
+        return licenseOfCustomerDTOs;
 
     }
 
     @Override
-    public List<CustomerDTO> CustomerLicenseListAndStatus(UUID licenseId) {
-        List<LicenseOfCustomer> licenseOfCustomers= licenseOfCustomerRepository.findByLicense_LicenseID(licenseId);
-        List<CustomerDTO> customerDTOList=  new ArrayList<>();
+    public List<CustomerDTO> CustomerLicenseListAndStatus(UUID licenseId, Status status) {
+        List<LicenseOfCustomer> licenseOfCustomers = licenseOfCustomerRepository.findByLicense_LicenseID(licenseId);
+        List<CustomerDTO> customerDTOList = new ArrayList<>();
 
-        for(LicenseOfCustomer licenseOfCustomer : licenseOfCustomers){
-            CustomerDTO customerDTO= modelMapper.map(licenseOfCustomer.getCustomer(),CustomerDTO.class);
-            customerDTOList.add(customerDTO);
+        for (LicenseOfCustomer licenseOfCustomer : licenseOfCustomers) {
+            if (status == null || licenseOfCustomer.getStatus().equals(status)) {
+                CustomerDTO customerDTO = modelMapper.map(licenseOfCustomer.getCustomer(), CustomerDTO.class);
+                customerDTOList.add(customerDTO);
+            }
         }
         return customerDTOList;
     }
-
-
 }
-
-
-
-
-
-
-

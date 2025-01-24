@@ -72,9 +72,9 @@ public class LicenseOfCustomerController {
     }
 
     @GetMapping("/CustomerLicenseListAndStatus")
-    public ResponseEntity<BaseResponseDTO> CustomerLicenseListAndStatus(@RequestParam UUID licenseId){
+    public ResponseEntity<BaseResponseDTO> CustomerLicenseListAndStatus(@RequestParam UUID licenseId, @RequestParam(required = false) Status status){
      try{
-         List<CustomerDTO> assignCustomerList= iLicenseOfCustomer.CustomerLicenseListAndStatus(licenseId);
+         List<CustomerDTO> assignCustomerList= iLicenseOfCustomer.CustomerLicenseListAndStatus(licenseId,status);
          BaseResponseDTO responseDTO=new BaseResponseDTO(assignCustomerList,"All Ok","List Of License Assigned Customer Successfully Retrived");
          return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
      }catch (Exception e){

@@ -56,10 +56,6 @@ public class LicenseListImpl implements ILicenseList {
     }
 
 
-
-
-
-
     @Transactional
     @Override
     public void deleteLicenseById(UUID licenseListID) {
@@ -79,13 +75,6 @@ public class LicenseListImpl implements ILicenseList {
 
         licenseListRepository.delete(license);
     }
-
-
-
-
-
-
-
 
     @Override
     public LicenseListDTO getLicenseListByID(UUID licenseID) {
