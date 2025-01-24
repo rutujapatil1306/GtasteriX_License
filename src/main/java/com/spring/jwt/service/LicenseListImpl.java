@@ -97,5 +97,30 @@ public class LicenseListImpl implements ILicenseList {
 
     }
 
+    @Override
+    public LicenseListDTO updateEnum(UUID licenseId, String present) {
+
+        isPresent availability;
+        try {
+            availability = isPresent.valueOf(present.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid value for 'present': " + present);
+        }
+
+
+        LicenseList list = licenseListRepository.findById(licenseId)
+                .orElseThrow(() -> new RuntimeException("License with ID " + licenseId + " Not Found"));
+
+
+        if (list.getPresent() == isPresent.AVAILABLE) {
+            list.setPresent(isPresent.UNAVAILABLE);
+        } else {
+            list.setPresent(isPresent.AVAILABLE);
+        }
+
+
+        list = licenseListRepository.save(list);
+        return modelMapper.map(list, LicenseListDTO.class);
+    }
 
 }
