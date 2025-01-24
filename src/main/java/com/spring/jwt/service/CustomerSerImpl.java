@@ -42,7 +42,7 @@ public class CustomerSerImpl implements ICustomer {
                 }
             }
         }
-        customer.setPresent(isPresent.UNAVAILABLE);
+        customer.setPresent(isPresent.AVAILABLE);
         Customer customer1 = customerRepository.save(customer);
         return modelMapper.map(customer1, CustomerDTO.class);
     }
