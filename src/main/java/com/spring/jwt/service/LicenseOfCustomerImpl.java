@@ -168,12 +168,75 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
 
     }
 
+//    @Override
+//    public List<LicenseOfCustomerDTO> searchByFilterPage(FilterDto filterDto, Integer pageNo, Integer pageSize) {
+//        Specification<LicenseOfCustomer> spec = (root, query, criteriaBuilder) -> {
+//            List<Predicate> predicates = new ArrayList<>();
+//
+//            // Filtering by license name
+//            if (filterDto.getLicenseName() != null && !filterDto.getLicenseName().isEmpty()) {
+//                predicates.add(criteriaBuilder.like(
+//                        criteriaBuilder.lower(root.get("licenseName")),
+//                        "%" + filterDto.getLicenseName().toLowerCase() + "%"
+//                ));
+//            }
+//
+//            // Filtering by status
+////            if (filterDto.getStatus() != null) {
+//               // predicates.add(criteriaBuilder.equal(root.get("status"), filterDto.getStatus()));
+////            }
+//
+//            // Filtering by issue date
+//            if (filterDto.getIssueDate() != null) {
+//                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("issueDate"), filterDto.getIssueDate()));
+//            }
+//
+//            // Filtering by expiry date
+//            if (filterDto.getExpiryDate() != null) {
+//                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("expiryDate"), filterDto.getExpiryDate()));
+//            }
+//
+//            // Filtering by customer details (if applicable)
+//            if (filterDto.getCustomer() != null && filterDto.getCustomer().getCustomerId() != null) {
+//                predicates.add(criteriaBuilder.equal(root.get("customer").get("id"), filterDto.getCustomer().getCustomerId()));
+//            }
+////            Predicate statusPredicate = criteriaBuilder.or(
+////                    criteriaBuilder.equal(root.get("status"), Status.ACTIVE),
+////                    criteriaBuilder.equal(root.get("status"), Status.PENDING),
+////                    criteriaBuilder.equal(root.get("status"),Status.REJECTED ),
+////                    criteriaBuilder.equal(root.get("status"),Status.RENEW)
+////            );
+////            predicates.add(statusPredicate);
+//            // Query sorting by most recent license ID
+//            query.orderBy(criteriaBuilder.desc(root.get("id")));
+//
+//            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+//        };
+//
+//        // Create pageable object
+//        Pageable pageable = PageRequest.of(pageNo - 1, pageSize); // Convert to zero-based index for page number
+//
+//        // Fetch filtered data from repository
+//        Page<LicenseOfCustomer> licensePage = licenseOfCustomerRepository.findAll(spec, pageable);
+//
+//        // Check if the result is empty
+//        if (licensePage.isEmpty()) {
+//            throw new PageNotFoundException("No licenses found for the specified filter and page.");
+//        }
+//        // Convert entity to DTO and return
+//        List<LicenseOfCustomerDTO> licenseDtoList = licensePage.stream()
+//                .map(LicenseOfCustomerDTO::new)
+//                .toList();
+//
+//        return licenseDtoList;
+//    }
+
     @Override
     public List<LicenseOfCustomerDTO> searchByFilterPage(FilterDto filterDto, Integer pageNo, Integer pageSize) {
         Specification<LicenseOfCustomer> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            // Filtering by license name
+            // Filter by license name
             if (filterDto.getLicenseName() != null && !filterDto.getLicenseName().isEmpty()) {
                 predicates.add(criteriaBuilder.like(
                         criteriaBuilder.lower(root.get("licenseName")),
@@ -181,54 +244,91 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
                 ));
             }
 
-            // Filtering by status
+            // Filter by status
             if (filterDto.getStatus() != null) {
                 predicates.add(criteriaBuilder.equal(root.get("status"), filterDto.getStatus()));
             }
 
-            // Filtering by issue date
+            // Filter by issue date
             if (filterDto.getIssueDate() != null) {
                 predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("issueDate"), filterDto.getIssueDate()));
             }
 
-            // Filtering by expiry date
+            // Filter by expiry date
             if (filterDto.getExpiryDate() != null) {
                 predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("expiryDate"), filterDto.getExpiryDate()));
             }
 
-            // Filtering by customer details (if applicable)
-            if (filterDto.getCustomer() != null && filterDto.getCustomer().getCustomerId() != null) {
-                predicates.add(criteriaBuilder.equal(root.get("customer").get("id"), filterDto.getCustomer().getCustomerId()));
-            }
-            Predicate statusPredicate = criteriaBuilder.or(
-                    criteriaBuilder.equal(root.get("status"), Status.ACTIVE),
-                    criteriaBuilder.equal(root.get("status"), Status.PENDING)
-                   // criteriaBuilder.equal(root.get)
-            );
+            // Filter by customer fields
+            if (filterDto.getCustomer() != null) {
+                CustomerDTO customer = filterDto.getCustomer();
 
-            // Query sorting by most recent license ID
+                if (customer.getCustomerId() != null) {
+                    predicates.add(criteriaBuilder.equal(root.get("customer").get("id"), customer.getCustomerId()));
+                }
+                if (customer.getFirstName() != null) {
+                    predicates.add(criteriaBuilder.like(
+                            criteriaBuilder.lower(root.get("customer").get("firstName")),
+                            "%" + customer.getFirstName().toLowerCase() + "%"
+                    ));
+                }
+                if (customer.getLastName() != null) {
+                    predicates.add(criteriaBuilder.like(
+                            criteriaBuilder.lower(root.get("customer").get("lastName")),
+                            "%" + customer.getLastName().toLowerCase() + "%"
+                    ));
+                }
+                if (customer.getMobileNumber() != null) {
+                    predicates.add(criteriaBuilder.equal(root.get("customer").get("mobileNumber"), customer.getMobileNumber()));
+                }
+                if (customer.getEmail() != null) {
+                    predicates.add(criteriaBuilder.like(
+                            criteriaBuilder.lower(root.get("customer").get("email")),
+                            "%" + customer.getEmail().toLowerCase() + "%"
+                    ));
+                }
+                if (customer.getArea() != null) {
+                    predicates.add(criteriaBuilder.like(
+                            criteriaBuilder.lower(root.get("customer").get("area")),
+                            "%" + customer.getArea().toLowerCase() + "%"
+                    ));
+                }
+                if (customer.getCity() != null) {
+                    predicates.add(criteriaBuilder.like(
+                            criteriaBuilder.lower(root.get("customer").get("city")),
+                            "%" + customer.getCity().toLowerCase() + "%"
+                    ));
+                }
+                if (customer.getState() != null) {
+                    predicates.add(criteriaBuilder.like(
+                            criteriaBuilder.lower(root.get("customer").get("state")),
+                            "%" + customer.getState().toLowerCase() + "%"
+                    ));
+                }
+                if (customer.getPincode() != null) {
+                    predicates.add(criteriaBuilder.equal(root.get("customer").get("pincode"), customer.getPincode()));
+                }
+                if (customer.getPresent() != null) {
+                    predicates.add(criteriaBuilder.equal(root.get("customer").get("present"), customer.getPresent()));
+                }
+            }
+
+
             query.orderBy(criteriaBuilder.desc(root.get("id")));
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
 
-        // Create pageable object
-        Pageable pageable = PageRequest.of(pageNo - 1, pageSize); // Convert to zero-based index for page number
-
-        // Fetch filtered data from repository
+        Pageable pageable = PageRequest.of(pageNo - 1, pageSize); // Zero-based indexing for pagination
         Page<LicenseOfCustomer> licensePage = licenseOfCustomerRepository.findAll(spec, pageable);
 
-        // Check if the result is empty
         if (licensePage.isEmpty()) {
             throw new PageNotFoundException("No licenses found for the specified filter and page.");
         }
 
-        // Convert entity to DTO and return
-        List<LicenseOfCustomerDTO> licenseDtoList = licensePage.stream()
+        return licensePage.stream()
                 .map(LicenseOfCustomerDTO::new)
                 .toList();
-
-        return licenseDtoList;
     }
 
 
