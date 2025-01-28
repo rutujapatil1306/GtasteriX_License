@@ -30,7 +30,7 @@ public class CustomerController {
             return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
         }
         catch(Exception e){
-            BaseResponseDTO errorResponseDTO = new BaseResponseDTO( e.getMessage(),"ERROR", e.getMessage());
+            BaseResponseDTO errorResponseDTO = new BaseResponseDTO(e.getMessage(),"ERROR", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponseDTO);
         }
 
@@ -132,11 +132,22 @@ public class CustomerController {
             return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
 
         }
-
         catch(Exception e){
             BaseResponseDTO err=new BaseResponseDTO(e.getMessage(),"ERROR","Licence not updated Successfully");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
 
+        }
+    }
+
+    @PostMapping("/SaveCustomerList")
+    public ResponseEntity<BaseResponseDTO> saveCustomerList (@RequestBody List<CustomerDTO> customerDTOList) {
+        try {
+            List<CustomerDTO> customerDTOList1 = icustomer.saveCustomerList(customerDTOList);
+            BaseResponseDTO responseDTO = new BaseResponseDTO(customerDTOList1, "Success", "successfully get this ");
+            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        } catch (Exception e) {
+            BaseResponseDTO errorResponseDTO = new BaseResponseDTO(e.getMessage(), "ERROR", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponseDTO);
         }
     }
 

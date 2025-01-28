@@ -26,4 +26,6 @@ public interface ICustomer {
     CustomerDTO deleteCustomer(UUID customerId);
 
     CustomerDTO updateEnum(UUID customerId, String present);
+
+    List<CustomerDTO> saveCustomerList(List<CustomerDTO> customerDTOList);
 }

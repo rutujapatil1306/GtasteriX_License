@@ -31,10 +31,8 @@ public class LicenseOfCustomer {
     @Column(nullable = false)
     private Status status;
 
-  //  @Column(nullable = false)
     private LocalDate issueDate;
 
-//    @Column(nullable = false)
     private LocalDate expiryDate;
 
     @ManyToOne
@@ -58,7 +56,4 @@ public class LicenseOfCustomer {
 
     }
 
-
-//    public int getVersion() {
-//    }
 }

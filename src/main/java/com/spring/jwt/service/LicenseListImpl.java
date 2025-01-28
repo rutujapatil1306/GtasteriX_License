@@ -55,11 +55,6 @@ public class LicenseListImpl implements ILicenseList {
         return dtoList;
     }
 
-
-
-
-
-
     @Transactional
     @Override
     public void deleteLicenseById(UUID licenseListID) {
@@ -67,32 +62,20 @@ public class LicenseListImpl implements ILicenseList {
         LicenseList license = licenseListRepository.findById(licenseListID)
                 .orElseThrow(() -> new RuntimeException("License not found with ID: " + licenseListID));
 
-
         List<LicenseOfCustomer> licenseOfCustomers = repository.findByLicense_LicenseID(licenseListID);
-
 
         for (LicenseOfCustomer licenseOfCustomer : licenseOfCustomers) {
             licenseOfCustomer.setLicense(null);
             repository.save(licenseOfCustomer);
         }
 
-
         licenseListRepository.delete(license);
     }
 
-
-
-
-
-
-
-
     @Override
     public LicenseListDTO getLicenseListByID(UUID licenseID) {
-
         LicenseList licenseList = licenseListRepository.findById(licenseID)
                 .orElseThrow(() -> new RuntimeException("License with ID " +licenseID + "Not Found"));
-
         return modelMapper.map(licenseList, LicenseListDTO.class);
 
     }
@@ -107,17 +90,14 @@ public class LicenseListImpl implements ILicenseList {
             throw new RuntimeException("Invalid value for 'present': " + present);
         }
 
-
         LicenseList list = licenseListRepository.findById(licenseId)
                 .orElseThrow(() -> new RuntimeException("License with ID " + licenseId + " Not Found"));
-
 
         if (list.getPresent() == isPresent.AVAILABLE) {
             list.setPresent(isPresent.UNAVAILABLE);
         } else {
             list.setPresent(isPresent.AVAILABLE);
         }
-
 
         list = licenseListRepository.save(list);
         return modelMapper.map(list, LicenseListDTO.class);
