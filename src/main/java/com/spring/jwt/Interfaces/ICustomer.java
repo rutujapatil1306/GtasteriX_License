@@ -1,7 +1,7 @@
 package com.spring.jwt.Interfaces;
 
 import com.spring.jwt.dto.CustomerDTO;
-import com.spring.jwt.entity.Customer;
+import com.spring.jwt.dto.LicenseListDTO;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,6 +27,5 @@ public interface ICustomer {
 
     CustomerDTO updateEnum(UUID customerId, String present);
 
-
-//    List<Customer> saveCustomerList(List<CustomerDTO> customerDTOList);
+    List<CustomerDTO> saveCustomerList(List<CustomerDTO> customerDTOList);
 }
