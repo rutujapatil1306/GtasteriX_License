@@ -28,5 +28,5 @@ public interface ICustomer {
     CustomerDTO updateEnum(UUID customerId, String present);
 
 
-    List<Customer> saveCustomerList(List<CustomerDTO> customerDTOList);
+//    List<Customer> saveCustomerList(List<CustomerDTO> customerDTOList);
 }
