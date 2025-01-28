@@ -3,7 +3,6 @@ package com.spring.jwt.service;
 
 import com.spring.jwt.Interfaces.ILicenseList;
 import com.spring.jwt.dto.LicenseListDTO;
-import com.spring.jwt.entity.Customer;
 import com.spring.jwt.entity.LicenseList;
 import com.spring.jwt.entity.LicenseOfCustomer;
 import com.spring.jwt.entity.isPresent;
@@ -35,9 +34,9 @@ public class LicenseListImpl implements ILicenseList {
     private CustomerRepository customerRepo;
 
     @Override
-    public LicenseListDTO saveLicense(LicenseListDTO licenseListDTO)
+    public LicenseListDTO saveLicense(LicenseListDTO LicenseListDTO)
     {
-        LicenseList licenseList = modelMapper.map(licenseListDTO, LicenseList.class);
+        LicenseList licenseList = modelMapper.map(LicenseListDTO, LicenseList.class);
         licenseList.setPresent(isPresent.AVAILABLE);
         LicenseList saveLicense = licenseListRepository.save(licenseList);
         return modelMapper.map(licenseList, LicenseListDTO.class);
@@ -55,6 +54,7 @@ public class LicenseListImpl implements ILicenseList {
         return dtoList;
     }
 
+
     @Transactional
     @Override
     public void deleteLicenseById(UUID licenseListID) {
@@ -62,20 +62,25 @@ public class LicenseListImpl implements ILicenseList {
         LicenseList license = licenseListRepository.findById(licenseListID)
                 .orElseThrow(() -> new RuntimeException("License not found with ID: " + licenseListID));
 
+
         List<LicenseOfCustomer> licenseOfCustomers = repository.findByLicense_LicenseID(licenseListID);
+
 
         for (LicenseOfCustomer licenseOfCustomer : licenseOfCustomers) {
             licenseOfCustomer.setLicense(null);
             repository.save(licenseOfCustomer);
         }
 
+
         licenseListRepository.delete(license);
     }
 
     @Override
     public LicenseListDTO getLicenseListByID(UUID licenseID) {
+
         LicenseList licenseList = licenseListRepository.findById(licenseID)
                 .orElseThrow(() -> new RuntimeException("License with ID " +licenseID + "Not Found"));
+
         return modelMapper.map(licenseList, LicenseListDTO.class);
 
     }
@@ -90,17 +95,33 @@ public class LicenseListImpl implements ILicenseList {
             throw new RuntimeException("Invalid value for 'present': " + present);
         }
 
+
         LicenseList list = licenseListRepository.findById(licenseId)
                 .orElseThrow(() -> new RuntimeException("License with ID " + licenseId + " Not Found"));
+
 
         if (list.getPresent() == isPresent.AVAILABLE) {
             list.setPresent(isPresent.UNAVAILABLE);
         } else {
             list.setPresent(isPresent.AVAILABLE);
         }
-
         list = licenseListRepository.save(list);
         return modelMapper.map(list, LicenseListDTO.class);
+    }
+
+    @Override
+    public List<LicenseListDTO> saveLicense(List<LicenseListDTO> list){
+        List<LicenseList> license=new ArrayList<>();
+        for(LicenseListDTO dto:list){
+            license.add(modelMapper.map(dto,LicenseList.class));
+        }
+        for (LicenseList licenseList : license) {
+            licenseListRepository.save(licenseList);
+        }
+        for(LicenseList licenseList:license){
+            list.add(modelMapper.map(licenseList,LicenseListDTO.class));
+        }
+        return list;
     }
 
 }

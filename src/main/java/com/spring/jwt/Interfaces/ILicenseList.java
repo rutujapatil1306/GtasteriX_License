@@ -16,4 +16,6 @@ public interface ILicenseList  {
     LicenseListDTO getLicenseListByID(UUID licenseID);
 
     LicenseListDTO updateEnum(UUID licenseID,String present);
+
+    List<LicenseListDTO> saveLicense(List<LicenseListDTO> list);
 }
