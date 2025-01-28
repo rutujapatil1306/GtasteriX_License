@@ -86,4 +86,18 @@ private ILicenseList iLicenseList;
 
         }
     }
+
+    @PostMapping("/SaveMultipleInfo")
+    public ResponseEntity<BaseResponseDTO> createLicenseList(@RequestBody List<LicenseListDTO> LicenseListDTOList){
+        try{
+            List<LicenseListDTO> list=iLicenseList.saveLicense(LicenseListDTOList);
+            BaseResponseDTO DTO=new BaseResponseDTO(list,"All Ok","License Saved Successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(DTO);
+        }
+        catch(Exception e){
+            BaseResponseDTO DTO=new BaseResponseDTO(e.getMessage(),"ERROR","Failed to Saved License");
+            return ResponseEntity.status(HttpStatus.OK).body(DTO);
+        }
+    }
+
 }

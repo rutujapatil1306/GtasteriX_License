@@ -19,7 +19,7 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID customerId;
 
-
+    @Column(nullable = false)
     @NotBlank(message = "Name is required.")
     @Size(max = 50, message = "Name must not exceed 50 characters.")
     private String firstName;
@@ -34,6 +34,7 @@ public class Customer {
 
     @NotBlank(message = "Email is required.")
     @Email(message = "Email must be a valid format.")
+    @Column(nullable = false, unique = true)
     private String email;
 
     @Column(nullable = false)

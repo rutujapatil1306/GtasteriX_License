@@ -3,7 +3,6 @@ package com.spring.jwt.service;
 
 import com.spring.jwt.Interfaces.ILicenseList;
 import com.spring.jwt.dto.LicenseListDTO;
-import com.spring.jwt.entity.Customer;
 import com.spring.jwt.entity.LicenseList;
 import com.spring.jwt.entity.LicenseOfCustomer;
 import com.spring.jwt.entity.isPresent;
@@ -35,9 +34,9 @@ public class LicenseListImpl implements ILicenseList {
     private CustomerRepository customerRepo;
 
     @Override
-    public LicenseListDTO saveLicense(LicenseListDTO licenseListDTO)
+    public LicenseListDTO saveLicense(LicenseListDTO LicenseListDTO)
     {
-        LicenseList licenseList = modelMapper.map(licenseListDTO, LicenseList.class);
+        LicenseList licenseList = modelMapper.map(LicenseListDTO, LicenseList.class);
         licenseList.setPresent(isPresent.AVAILABLE);
         LicenseList saveLicense = licenseListRepository.save(licenseList);
         return modelMapper.map(licenseList, LicenseListDTO.class);
@@ -106,10 +105,23 @@ public class LicenseListImpl implements ILicenseList {
         } else {
             list.setPresent(isPresent.AVAILABLE);
         }
-
-
         list = licenseListRepository.save(list);
         return modelMapper.map(list, LicenseListDTO.class);
+    }
+
+    @Override
+    public List<LicenseListDTO> saveLicense(List<LicenseListDTO> list){
+        List<LicenseList> license=new ArrayList<>();
+        for(LicenseListDTO dto:list){
+            license.add(modelMapper.map(dto,LicenseList.class));
+        }
+        for (LicenseList licenseList : license) {
+            licenseListRepository.save(licenseList);
+        }
+        for(LicenseList licenseList:license){
+            list.add(modelMapper.map(licenseList,LicenseListDTO.class));
+        }
+        return list;
     }
 
 }

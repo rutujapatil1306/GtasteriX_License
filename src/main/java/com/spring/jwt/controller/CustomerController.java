@@ -140,4 +140,17 @@ public class CustomerController {
         }
     }
 
+    @PostMapping("/SaveMultipleCustomer")
+    public ResponseEntity<BaseResponseDTO> createLicenseList(@RequestBody List<CustomerDTO> customerDTOList){
+        try{
+            List<Customer> list=icustomer.saveCustomerList(customerDTOList);
+            BaseResponseDTO DTO=new BaseResponseDTO(list,"All Ok","Customer Saved Successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(DTO);
+        }
+        catch(Exception e){
+            BaseResponseDTO DTO=new BaseResponseDTO(e.getMessage(),"ERROR","Failed to Saved Customer");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(DTO);
+        }
+    }
+
 }

@@ -2,7 +2,6 @@ package com.spring.jwt.service;
 
 import com.spring.jwt.Interfaces.ICustomer;
 import com.spring.jwt.dto.CustomerDTO;
-import com.spring.jwt.dto.LicenseListDTO;
 import com.spring.jwt.dto.LicenseOfCustomerDTO;
 import com.spring.jwt.entity.*;
 import com.spring.jwt.repository.CustomerRepository;
@@ -247,8 +246,17 @@ public class CustomerSerImpl implements ICustomer {
         list = customerRepository.save(list);
         return modelMapper.map(list, CustomerDTO.class);
     }
+    @Override
+    public List<Customer> saveCustomerList(List<CustomerDTO> customerDTOList) {
+        List<Customer> customers = new ArrayList<>();
 
-
+        for (CustomerDTO customerDTO : customerDTOList) {
+            Customer customer = modelMapper.map(customerDTO, Customer.class);
+            customers.add(customer);
+        }
+        customerRepository.saveAll(customers);
+        return customers;
+    }
 }
 
 
