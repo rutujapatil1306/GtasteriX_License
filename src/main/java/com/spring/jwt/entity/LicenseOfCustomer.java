@@ -39,10 +39,9 @@ public class LicenseOfCustomer {
     @JoinColumn(name = "customer_id")
     @JsonBackReference
     private Customer customer;
-
-    @ManyToOne(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
-    @JoinColumn(name = "license_id")
-
+  
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "license_id", nullable = true)
     private LicenseList license;
 
     public LicenseOfCustomer(LicenseOfCustomerDTO customerDTO){
