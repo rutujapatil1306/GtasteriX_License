@@ -2,6 +2,8 @@ package com.spring.jwt.controller;
 
 import com.spring.jwt.Interfaces.ICustomer;
 import com.spring.jwt.dto.CustomerDTO;
+import com.spring.jwt.dto.LicenseListDTO;
+import com.spring.jwt.entity.Customer;
 import com.spring.jwt.exception.BaseException;
 import com.spring.jwt.utils.BaseResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +30,7 @@ public class CustomerController {
             return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
         }
         catch(Exception e){
-            BaseResponseDTO errorResponseDTO = new BaseResponseDTO( e.getMessage(),"ERROR", "List of License not Found: ");
+            BaseResponseDTO errorResponseDTO = new BaseResponseDTO(e.getMessage(),"ERROR", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponseDTO);
         }
 
@@ -45,7 +47,6 @@ public class CustomerController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
-
 
     @GetMapping("/getCustomerWithLicenses")
     public ResponseEntity<BaseResponseDTO> getCustomerWithLicenses(@RequestParam UUID customerId) {
@@ -72,7 +73,82 @@ public class CustomerController {
         }
     }
 
+    @GetMapping("/getByName")
+    public ResponseEntity<BaseResponseDTO> getCustomerByName(@RequestParam String customerName) {
+        try {
+            List<CustomerDTO> customers = icustomer.searchCustomerByName(customerName);
+            return ResponseEntity.ok(new BaseResponseDTO(customers, "SUCCESS", "Customers fetched successfully."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new BaseResponseDTO(null, "ERROR", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new BaseResponseDTO(null, "ERROR", e.getMessage()));
+        }
+    }
 
+    @GetMapping("/filter")
+    public ResponseEntity<BaseResponseDTO> getByFilter( @RequestParam(required = false) String name,
+                                                        @RequestParam(required = false) String area,
+                                                        @RequestParam(required = false) String email){
+        try{
+            List<CustomerDTO> list=icustomer.getByFilter(name,area,email);
+            return ResponseEntity.ok(new BaseResponseDTO(list,"ALL OK","Customer list Successfully"));
+        }
+        catch(Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new BaseResponseDTO(null,"ERROR",e.getMessage()));
+        }
+    }
 
+    @PatchMapping("/UpdateLicense")
+    public ResponseEntity<BaseResponseDTO> assignLicenceToCustomer(@RequestParam UUID customerId, @RequestBody CustomerDTO customerDTO) {
+        try {
+            CustomerDTO updatedCustomer = icustomer.UpdateCustomerDetail(customerId,customerDTO);
+            BaseResponseDTO responseDTO = new BaseResponseDTO(updatedCustomer, "SUCCESS", "Licence Updated Successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        } catch (RuntimeException e) {
+            BaseResponseDTO errorResponseDTO = new BaseResponseDTO(null, "ERROR", "Failed to Update : " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDTO);
+        }
+    }
+
+    @DeleteMapping("/DeleteCustomerById")
+    public ResponseEntity<BaseResponseDTO> DeleteCustomer(@RequestParam UUID CustomerId){
+        try{
+            CustomerDTO customerDTO= icustomer.deleteCustomer(CustomerId);
+            BaseResponseDTO responseDTO=new BaseResponseDTO(customerDTO,"success","Delete Succesfully");
+            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        }catch (Exception e){
+            BaseResponseDTO responseDTO=new BaseResponseDTO(e.getMessage(),"Error","Failed To Delete");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDTO);
+        }
+    }
+
+    @PatchMapping("/updateCustomerStatus")
+    public ResponseEntity<BaseResponseDTO> updateEnum(@RequestParam UUID customerId,@RequestParam String present){
+        try{
+            CustomerDTO dto=icustomer.updateEnum(customerId,present);
+            BaseResponseDTO responseDTO=new BaseResponseDTO(dto,"SUCCESS","Licence Update Successfully");
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
+
+        }
+        catch(Exception e){
+            BaseResponseDTO err=new BaseResponseDTO(e.getMessage(),"ERROR","Licence not updated Successfully");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
+
+        }
+    }
+
+    @PostMapping("/SaveCustomerList")
+    public ResponseEntity<BaseResponseDTO> saveCustomerList (@RequestBody List<CustomerDTO> customerDTOList) {
+        try {
+            List<CustomerDTO> customerDTOList1 = icustomer.saveCustomerList(customerDTOList);
+            BaseResponseDTO responseDTO = new BaseResponseDTO(customerDTOList1, "Success", "successfully get this ");
+            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        } catch (Exception e) {
+            BaseResponseDTO errorResponseDTO = new BaseResponseDTO(e.getMessage(), "ERROR", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponseDTO);
+        }
+    }
 
 }
