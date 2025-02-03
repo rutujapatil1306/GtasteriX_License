@@ -2,6 +2,7 @@ package com.spring.jwt.service;
 
 import com.spring.jwt.Interfaces.ILicenseOfCustomer;
 import com.spring.jwt.dto.CustomerDTO;
+import com.spring.jwt.dto.FilterDto;
 import com.spring.jwt.dto.LicenseListDTO;
 import com.spring.jwt.dto.LicenseOfCustomerDTO;
 import com.spring.jwt.entity.Customer;
@@ -9,10 +10,16 @@ import com.spring.jwt.entity.LicenseList;
 import com.spring.jwt.entity.LicenseOfCustomer;
 import com.spring.jwt.entity.Status;
 
+import com.spring.jwt.exception.PageNotFoundException;
 import com.spring.jwt.repository.CustomerRepository;
 import com.spring.jwt.repository.LicenseOfCustomerRepository;
+import jakarta.persistence.criteria.Predicate;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -94,24 +101,7 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
             throw new RuntimeException("Invalid status value: " + status);
         }
 
-        switch (licenseOfCustomer.getStatus()) {
-            case NO_STATUS:
-                if (newStatus != Status.PENDING) {
-                    throw new RuntimeException("Invalid transition: NO_STATUS can only transition to PENDING");
-                }
-                break;
-            case PENDING:
-                if (newStatus != Status.ACTIVE && newStatus != Status.REJECTED) {
-                    throw new RuntimeException("Invalid transition: PENDING can only transition to ACTIVE or REJECTED");
-                }
-                break;
-            case ACTIVE:
-            case REJECTED:
-                throw new RuntimeException("Invalid transition: Status " + licenseOfCustomer.getStatus() + " cannot be changed");
-            default:
-                throw new RuntimeException("Unknown current status: " + licenseOfCustomer.getStatus());
-        }
-
+        // Directly set the new status without any validation
         licenseOfCustomer.setStatus(newStatus);
 
         if (newStatus == Status.ACTIVE) {
@@ -123,8 +113,7 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
             licenseOfCustomer.setExpiryDate(LocalDate.now().plusYears(licenseList.getValidTill()));
         }
 
-
-        licenseOfCustomerRepository.save(licenseOfCustomer);
+        licenseOfCustomerRepository.save(licenseOfCustomer);  // Save the updated license
 
         // Map customer to DTO
         Customer customer = licenseOfCustomer.getCustomer();
@@ -133,7 +122,7 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
         }
 
         CustomerDTO customerDTO = modelMapper.map(customer, CustomerDTO.class);
-        customerDTO.setLicenceDTOS(customer.getLicence().stream()
+        customerDTO.setLicenseOfCustomerDTOS(customer.getLicence().stream()
                 .map(lic -> modelMapper.map(lic, LicenseOfCustomerDTO.class))
                 .collect(Collectors.toList()));
 
@@ -141,19 +130,213 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
     }
 
 
+
+
     @Override
     public List<LicenseOfCustomerDTO> findByStatus(String status) {
-        Status st=Status.valueOf(status.toUpperCase());
-        List<LicenseOfCustomer> ll=licenseOfCustomerRepository.findByStatus(st);
-        List<LicenseOfCustomerDTO> li=new ArrayList<>();
-        for(LicenseOfCustomer  ofCustomer:ll){
-            li.add(modelMapper.map(ofCustomer,LicenseOfCustomerDTO.class));
+        Status st = Status.valueOf(status.toUpperCase());
+        List<LicenseOfCustomer> ll = licenseOfCustomerRepository.findByStatus(st);
+        List<LicenseOfCustomerDTO> li = new ArrayList<>();
+        for (LicenseOfCustomer ofCustomer : ll) {
+            li.add(modelMapper.map(ofCustomer, LicenseOfCustomerDTO.class));
         }
         return li;
     }
 
+    @Override
+    public List<LicenseOfCustomerDTO> getAllLicenseOfCustomer() {
+        List<LicenseOfCustomerDTO> licenseOfCustomerDTOs = new ArrayList<>();
+
+        List<LicenseOfCustomer> licenseOfCustomers = licenseOfCustomerRepository.findAll();
+
+        for (LicenseOfCustomer license : licenseOfCustomers) {
+            LicenseOfCustomerDTO licenseDTO = modelMapper.map(license, LicenseOfCustomerDTO.class);
+
+            if (license.getCustomer() != null) {
+                CustomerDTO customerDTO = modelMapper.map(license.getCustomer(), CustomerDTO.class);
+                licenseDTO.setCustomer(customerDTO);
+            }
+            if (license.getLicense() != null) {
+                LicenseListDTO licenseListDTO = modelMapper.map(license.getLicense(), LicenseListDTO.class);
+                licenseDTO.setLicenseList(licenseListDTO);
+            }
+
+            licenseOfCustomerDTOs.add(licenseDTO);
+
+        }
+            return licenseOfCustomerDTOs;
+
+    }
+
+//    @Override
+//    public List<LicenseOfCustomerDTO> searchByFilterPage(FilterDto filterDto, Integer pageNo, Integer pageSize) {
+//        Specification<LicenseOfCustomer> spec = (root, query, criteriaBuilder) -> {
+//            List<Predicate> predicates = new ArrayList<>();
+//
+//            // Filtering by license name
+//            if (filterDto.getLicenseName() != null && !filterDto.getLicenseName().isEmpty()) {
+//                predicates.add(criteriaBuilder.like(
+//                        criteriaBuilder.lower(root.get("licenseName")),
+//                        "%" + filterDto.getLicenseName().toLowerCase() + "%"
+//                ));
+//            }
+//
+//            // Filtering by status
+////            if (filterDto.getStatus() != null) {
+//               // predicates.add(criteriaBuilder.equal(root.get("status"), filterDto.getStatus()));
+////            }
+//
+//            // Filtering by issue date
+//            if (filterDto.getIssueDate() != null) {
+//                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("issueDate"), filterDto.getIssueDate()));
+//            }
+//
+//            // Filtering by expiry date
+//            if (filterDto.getExpiryDate() != null) {
+//                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("expiryDate"), filterDto.getExpiryDate()));
+//            }
+//
+//            // Filtering by customer details (if applicable)
+//            if (filterDto.getCustomer() != null && filterDto.getCustomer().getCustomerId() != null) {
+//                predicates.add(criteriaBuilder.equal(root.get("customer").get("id"), filterDto.getCustomer().getCustomerId()));
+//            }
+////            Predicate statusPredicate = criteriaBuilder.or(
+////                    criteriaBuilder.equal(root.get("status"), Status.ACTIVE),
+////                    criteriaBuilder.equal(root.get("status"), Status.PENDING),
+////                    criteriaBuilder.equal(root.get("status"),Status.REJECTED ),
+////                    criteriaBuilder.equal(root.get("status"),Status.RENEW)
+////            );
+////            predicates.add(statusPredicate);
+//            // Query sorting by most recent license ID
+//            query.orderBy(criteriaBuilder.desc(root.get("id")));
+//
+//            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+//        };
+//
+//        // Create pageable object
+//        Pageable pageable = PageRequest.of(pageNo - 1, pageSize); // Convert to zero-based index for page number
+//
+//        // Fetch filtered data from repository
+//        Page<LicenseOfCustomer> licensePage = licenseOfCustomerRepository.findAll(spec, pageable);
+//
+//        // Check if the result is empty
+//        if (licensePage.isEmpty()) {
+//            throw new PageNotFoundException("No licenses found for the specified filter and page.");
+//        }
+//        // Convert entity to DTO and return
+//        List<LicenseOfCustomerDTO> licenseDtoList = licensePage.stream()
+//                .map(LicenseOfCustomerDTO::new)
+//                .toList();
+//
+//        return licenseDtoList;
+//    }
+
+    @Override
+    public List<LicenseOfCustomerDTO> searchByFilterPage(FilterDto filterDto, Integer pageNo, Integer pageSize) {
+        Specification<LicenseOfCustomer> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Filter by license name
+            if (filterDto.getLicenseName() != null && !filterDto.getLicenseName().isEmpty()) {
+                predicates.add(criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("licenseName")),
+                        "%" + filterDto.getLicenseName().toLowerCase() + "%"
+                ));
+            }
+
+            // Filter by status
+            if (filterDto.getStatus() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("status"), filterDto.getStatus()));
+            }
+
+            // Filter by issue date
+            if (filterDto.getIssueDate() != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("issueDate"), filterDto.getIssueDate()));
+            }
+
+            // Filter by expiry date
+            if (filterDto.getExpiryDate() != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("expiryDate"), filterDto.getExpiryDate()));
+            }
+
+            // Filter by customer fields
+            if (filterDto.getCustomer() != null) {
+                CustomerDTO customer = filterDto.getCustomer();
+
+                if (customer.getCustomerId() != null) {
+                    predicates.add(criteriaBuilder.equal(root.get("customer").get("id"), customer.getCustomerId()));
+                }
+                if (customer.getFirstName() != null) {
+                    predicates.add(criteriaBuilder.like(
+                            criteriaBuilder.lower(root.get("customer").get("firstName")),
+                            "%" + customer.getFirstName().toLowerCase() + "%"
+                    ));
+                }
+                if (customer.getLastName() != null) {
+                    predicates.add(criteriaBuilder.like(
+                            criteriaBuilder.lower(root.get("customer").get("lastName")),
+                            "%" + customer.getLastName().toLowerCase() + "%"
+                    ));
+                }
+                if (customer.getMobileNumber() != null) {
+                    predicates.add(criteriaBuilder.equal(root.get("customer").get("mobileNumber"), customer.getMobileNumber()));
+                }
+                if (customer.getEmail() != null) {
+                    predicates.add(criteriaBuilder.like(
+                            criteriaBuilder.lower(root.get("customer").get("email")),
+                            "%" + customer.getEmail().toLowerCase() + "%"
+                    ));
+                }
+                if (customer.getArea() != null) {
+                    predicates.add(criteriaBuilder.like(
+                            criteriaBuilder.lower(root.get("customer").get("area")),
+                            "%" + customer.getArea().toLowerCase() + "%"
+                    ));
+                }
+                if (customer.getCity() != null) {
+                    predicates.add(criteriaBuilder.like(
+                            criteriaBuilder.lower(root.get("customer").get("city")),
+                            "%" + customer.getCity().toLowerCase() + "%"
+                    ));
+                }
+                if (customer.getState() != null) {
+                    predicates.add(criteriaBuilder.like(
+                            criteriaBuilder.lower(root.get("customer").get("state")),
+                            "%" + customer.getState().toLowerCase() + "%"
+                    ));
+                }
+                if (customer.getPincode() != null) {
+                    predicates.add(criteriaBuilder.equal(root.get("customer").get("pincode"), customer.getPincode()));
+                }
+                if (customer.getPresent() != null) {
+                    predicates.add(criteriaBuilder.equal(root.get("customer").get("present"), customer.getPresent()));
+                }
+            }
+
+
+            query.orderBy(criteriaBuilder.desc(root.get("id")));
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Pageable pageable = PageRequest.of(pageNo - 1, pageSize); // Zero-based indexing for pagination
+        Page<LicenseOfCustomer> licensePage = licenseOfCustomerRepository.findAll(spec, pageable);
+
+        if (licensePage.isEmpty()) {
+            throw new PageNotFoundException("No licenses found for the specified filter and page.");
+        }
+
+        return licensePage.stream()
+                .map(LicenseOfCustomerDTO::new)
+                .toList();
+    }
 
 
 }
+
+
+
+
+
 
 

@@ -1,7 +1,9 @@
 package com.spring.jwt.Interfaces;
 
 import com.spring.jwt.dto.CustomerDTO;
+import com.spring.jwt.dto.FilterDto;
 import com.spring.jwt.dto.LicenseOfCustomerDTO;
+import com.spring.jwt.entity.Status;
 
 import java.util.List;
 import java.util.UUID;
@@ -12,4 +14,8 @@ public interface ILicenseOfCustomer {
 
 
     List<LicenseOfCustomerDTO> findByStatus(String status);
+
+    List<LicenseOfCustomerDTO> getAllLicenseOfCustomer();
+
+    List<LicenseOfCustomerDTO> searchByFilterPage(FilterDto license, Integer pageNo, Integer pageSize);
 }

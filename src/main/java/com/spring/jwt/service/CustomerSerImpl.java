@@ -2,11 +2,9 @@ package com.spring.jwt.service;
 
 import com.spring.jwt.Interfaces.ICustomer;
 import com.spring.jwt.dto.CustomerDTO;
+import com.spring.jwt.dto.LicenseListDTO;
 import com.spring.jwt.dto.LicenseOfCustomerDTO;
-import com.spring.jwt.entity.Customer;
-import com.spring.jwt.entity.LicenseList;
-import com.spring.jwt.entity.LicenseOfCustomer;
-import com.spring.jwt.entity.Status;
+import com.spring.jwt.entity.*;
 import com.spring.jwt.repository.CustomerRepository;
 import com.spring.jwt.repository.LicenseListRepository;
 import com.spring.jwt.repository.LicenseOfCustomerRepository;
@@ -18,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class CustomerSerImpl implements ICustomer {
@@ -45,6 +44,7 @@ public class CustomerSerImpl implements ICustomer {
                 }
             }
         }
+        customer.setPresent(isPresent.AVAILABLE);
         Customer customer1 = customerRepository.save(customer);
         return modelMapper.map(customer1, CustomerDTO.class);
     }
@@ -55,8 +55,16 @@ public class CustomerSerImpl implements ICustomer {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
 
+
         LicenseList licenseList = licenseListRepository.findById(licenseID)
                 .orElseThrow(() -> new RuntimeException("License not found with ID: " + licenseID));
+
+        if(customer.getPresent()==isPresent.UNAVAILABLE){
+            throw new RuntimeException("Customer is Inactive");
+        }
+        if(licenseList.getPresent() == isPresent.UNAVAILABLE){
+            throw new RuntimeException("License  is Inactive");
+        }
 
         Optional<LicenseOfCustomer> existingLicense = licenseOfCustomerRepository.findByCustomerIdAndLicenseId(customerId, licenseID);
         if (existingLicense.isPresent()) {
@@ -89,7 +97,7 @@ public class CustomerSerImpl implements ICustomer {
             licenceDTO.setStatus(lic.getStatus());
             licenceDTOs.add(licenceDTO);
         }
-        customerDTO.setLicenceDTOS(licenceDTOs);
+        customerDTO.setLicenseOfCustomerDTOS(licenceDTOs);
         return customerDTO;
     }
 
@@ -125,7 +133,7 @@ public class CustomerSerImpl implements ICustomer {
                 licenceDTOs.add(licenceDTO);
             }
 
-            customerDTO.setLicenceDTOS(licenceDTOs);
+            customerDTO.setLicenseOfCustomerDTOS(licenceDTOs);
             customerDTOs.add(customerDTO);
         }
 
@@ -215,7 +223,58 @@ public class CustomerSerImpl implements ICustomer {
         return null;
     }
 
-}
+    @Override
+    public CustomerDTO updateEnum(UUID licenseId, String present) {
+
+        isPresent availability;
+        try {
+            availability = isPresent.valueOf(present.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid value for 'present': " + present);
+        }
+
+
+        Customer list = customerRepository.findById(licenseId)
+                .orElseThrow(() -> new RuntimeException("License with ID " + licenseId + " Not Found"));
+
+        if (list.getPresent() == isPresent.AVAILABLE) {
+            list.setPresent(isPresent.UNAVAILABLE);
+        } else {
+            list.setPresent(isPresent.AVAILABLE);
+        }
+
+        list = customerRepository.save(list);
+        return modelMapper.map(list, CustomerDTO.class);
+    }
+
+        @Override
+        public List<CustomerDTO> saveCustomerList(List<CustomerDTO> customerDTOList) {
+            List<Customer> customers = new ArrayList<>();
+
+            for (CustomerDTO customerDTO : customerDTOList) {
+                Customer customer = modelMapper.map(customerDTO, Customer.class);
+
+                if (customerRepository.getAllMobileNumbers() != null &&
+                        customerRepository.getAllMobileNumbers().contains(customer.getMobileNumber())) {
+                    throw new RuntimeException("User with mobile number " + customer.getMobileNumber() + " already exists");
+                }
+
+                customer.setPresent(isPresent.AVAILABLE);
+                customers.add(customer);
+            }
+
+            List<Customer> savedCustomers = customerRepository.saveAll(customers);
+
+            return savedCustomers.stream()
+                    .map(customer -> modelMapper.map(customer, CustomerDTO.class))
+                    .collect(Collectors.toList());
+        }
+
+    }
+
+
+
+
 
 
 

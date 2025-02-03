@@ -1,6 +1,7 @@
 package com.spring.jwt.dto;
 
 import com.spring.jwt.entity.LicenseOfCustomer;
+import com.spring.jwt.entity.isPresent;
 import lombok.Data;
 
 import java.util.List;
@@ -15,5 +16,7 @@ public class LicenseListDTO {
 
     private Integer validTill;
 
-  //  private List<LicenseOfCustomer> licence;
+    private isPresent present;
+
+   // private List<LicenseOfCustomer> licenseOfCustomers;
 }
