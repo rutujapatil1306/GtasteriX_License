@@ -35,6 +35,6 @@ public class LicenseOfCustomer {
     private Customer customer;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "license_id", nullable = false)
+    @JoinColumn(name = "license_id", nullable = true)
     private LicenseList license;
 }
