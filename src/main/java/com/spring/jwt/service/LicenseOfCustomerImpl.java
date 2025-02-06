@@ -331,6 +331,14 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
                 .toList();
     }
 
+    @Override
+    public LicenseListDTO deleteById(UUID licenseOfCustomerId) {
+      LicenseOfCustomer licenseOfCustomer=  licenseOfCustomerRepository.findById(licenseOfCustomerId)
+              .orElseThrow(() -> new RuntimeException("Customer not found with ID: " +licenseOfCustomerId));;
+       licenseOfCustomerRepository.delete(licenseOfCustomer);
+       return null;
+    }
+
 
 }
 

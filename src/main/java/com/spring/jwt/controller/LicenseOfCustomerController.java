@@ -203,5 +203,19 @@ public class LicenseOfCustomerController {
         }
     }
 
+    @DeleteMapping("/deleteLicenseOfCustomer")
+    public ResponseEntity<BaseResponseDTO> deleteById(@RequestParam UUID licenseOfCustomerId) {
+        try {
+            LicenseListDTO dto = iLicenseOfCustomer.deleteById(licenseOfCustomerId);
+            BaseResponseDTO response = new BaseResponseDTO(dto, "ALL OK", "All LicenseOfCustomer Deleted Successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (Exception e) {
+            BaseResponseDTO err = new BaseResponseDTO("An unexpected error occurred", "Error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
+
+        }
+
+    }
+
 
 }
