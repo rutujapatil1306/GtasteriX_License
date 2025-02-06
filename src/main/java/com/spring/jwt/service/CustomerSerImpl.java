@@ -68,7 +68,7 @@ public class CustomerSerImpl implements ICustomer {
 
         Optional<LicenseOfCustomer> existingLicense = licenseOfCustomerRepository.findByCustomerIdAndLicenseId(customerId, licenseID);
         if (existingLicense.isPresent()) {
-            throw new RuntimeException("Customer already has this license with ID: " + licenseID);
+            throw new RuntimeException("Customer already has this license.");
         }
 
         LicenseOfCustomer licenseOfCustomer1 = new LicenseOfCustomer();
