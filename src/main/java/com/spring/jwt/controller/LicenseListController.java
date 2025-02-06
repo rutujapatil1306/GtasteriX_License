@@ -20,6 +20,7 @@ public class LicenseListController {
 @Autowired
 private ILicenseList iLicenseList;
 
+//admin
     @PostMapping("/saveLicense")
     public ResponseEntity<BaseResponseDTO> saveLicense(@RequestBody LicenseListDTO licenseListDTO)
     {
@@ -33,6 +34,7 @@ private ILicenseList iLicenseList;
         }
     }
 
+    //admin user
     @GetMapping("/getLicenseList")
     public ResponseEntity<BaseResponseDTO> getLicenseList()
     {
