@@ -2,6 +2,7 @@ package com.spring.jwt.Interfaces;
 
 import com.spring.jwt.dto.CustomerDTO;
 import com.spring.jwt.dto.FilterDto;
+import com.spring.jwt.dto.LicenseListDTO;
 import com.spring.jwt.dto.LicenseOfCustomerDTO;
 import com.spring.jwt.entity.Status;
 
@@ -18,4 +19,6 @@ public interface ILicenseOfCustomer {
     List<LicenseOfCustomerDTO> getAllLicenseOfCustomer();
 
     List<LicenseOfCustomerDTO> searchByFilterPage(FilterDto license, Integer pageNo, Integer pageSize);
+
+    LicenseListDTO deleteById(UUID licenseOfCustomerId);
 }
