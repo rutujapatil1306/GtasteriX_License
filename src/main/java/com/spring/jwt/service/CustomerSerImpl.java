@@ -2,7 +2,6 @@ package com.spring.jwt.service;
 
 import com.spring.jwt.Interfaces.ICustomer;
 import com.spring.jwt.dto.CustomerDTO;
-import com.spring.jwt.dto.LicenseListDTO;
 import com.spring.jwt.dto.LicenseOfCustomerDTO;
 import com.spring.jwt.entity.*;
 import com.spring.jwt.repository.CustomerRepository;
@@ -11,7 +10,9 @@ import com.spring.jwt.repository.LicenseOfCustomerRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -49,21 +50,72 @@ public class CustomerSerImpl implements ICustomer {
         return modelMapper.map(customer1, CustomerDTO.class);
     }
 
+//    @Override
+//    public CustomerDTO assignLicenceAndSetStatus(UUID customerId, UUID licenseID) {
+//
+//        Customer customer = customerRepository.findById(customerId)
+//                .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
+//
+//
+//        LicenseList licenseList = licenseListRepository.findById(licenseID)
+//                .orElseThrow(() -> new RuntimeException("License not found with ID: " + licenseID));
+//
+//        if(customer.getPresent()==isPresent.UNAVAILABLE){
+//            throw new RuntimeException("Customer is Inactive");
+//        }
+//        if(licenseList.getPresent() == isPresent.UNAVAILABLE){
+//            throw new RuntimeException("License  is Inactive");
+//        }
+//
+//        Optional<LicenseOfCustomer> existingLicense = licenseOfCustomerRepository.findByCustomerIdAndLicenseId(customerId, licenseID);
+//        if (existingLicense.isPresent()) {
+//            throw new RuntimeException("Customer already has this license.");
+//        }
+//
+//        LicenseOfCustomer licenseOfCustomer1 = new LicenseOfCustomer();
+//        licenseOfCustomer1.setLicense(licenseList);
+//        licenseOfCustomer1.setCustomer(customer);
+//        licenseOfCustomer1.setLicenseName(licenseList.getLicenseName());
+//
+//        licenseOfCustomer1.setStatus(Status.PENDING);
+//
+//        licenseOfCustomerRepository.save(licenseOfCustomer1);
+//
+//        if (customer.getLicence() == null) {
+//            customer.setLicence(new ArrayList<>());
+//        }
+//        customer.getLicence().add(licenseOfCustomer1);
+//
+//        Customer updatedCustomer = customerRepository.save(customer);
+//
+//        CustomerDTO customerDTO = modelMapper.map(updatedCustomer, CustomerDTO.class);
+//
+//        List<LicenseOfCustomerDTO> licenceDTOs = new ArrayList<>();
+//        for (LicenseOfCustomer lic : updatedCustomer.getLicence()) {
+//            LicenseOfCustomerDTO licenceDTO = new LicenseOfCustomerDTO();
+//            licenceDTO.setLicenseOfCustomerId(lic.getLicenseOfCustomerId());
+//            licenceDTO.setLicenseName(lic.getLicenseName());
+//            licenceDTO.setStatus(lic.getStatus());
+//            licenceDTOs.add(licenceDTO);
+//        }
+//        customerDTO.setLicenseOfCustomerDTOS(licenceDTOs);
+//        return customerDTO;
+//    }
+
     @Override
-    public CustomerDTO assignLicenceAndSetStatus(UUID customerId, UUID licenseID) {
+    public CustomerDTO assignLicenceAndSetStatus(UUID customerId, UUID licenseID, List<MultipartFile> imageFiles) throws IOException, IOException {
 
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
 
-
         LicenseList licenseList = licenseListRepository.findById(licenseID)
                 .orElseThrow(() -> new RuntimeException("License not found with ID: " + licenseID));
 
-        if(customer.getPresent()==isPresent.UNAVAILABLE){
+        if (customer.getPresent() == isPresent.UNAVAILABLE) {
             throw new RuntimeException("Customer is Inactive");
         }
-        if(licenseList.getPresent() == isPresent.UNAVAILABLE){
-            throw new RuntimeException("License  is Inactive");
+        if (licenseList.getPresent() == isPresent.UNAVAILABLE) {
+            throw new RuntimeException("License is Inactive");
         }
 
         Optional<LicenseOfCustomer> existingLicense = licenseOfCustomerRepository.findByCustomerIdAndLicenseId(customerId, licenseID);
@@ -75,8 +127,16 @@ public class CustomerSerImpl implements ICustomer {
         licenseOfCustomer1.setLicense(licenseList);
         licenseOfCustomer1.setCustomer(customer);
         licenseOfCustomer1.setLicenseName(licenseList.getLicenseName());
-
         licenseOfCustomer1.setStatus(Status.PENDING);
+
+        // Convert images to byte[]
+        List<byte[]> imageData = new ArrayList<>();
+        if (imageFiles != null) {
+            for (MultipartFile file : imageFiles) {
+                imageData.add(file.getBytes());
+            }
+        }
+        licenseOfCustomer1.setImages(imageData);
 
         licenseOfCustomerRepository.save(licenseOfCustomer1);
 
@@ -95,11 +155,13 @@ public class CustomerSerImpl implements ICustomer {
             licenceDTO.setLicenseOfCustomerId(lic.getLicenseOfCustomerId());
             licenceDTO.setLicenseName(lic.getLicenseName());
             licenceDTO.setStatus(lic.getStatus());
+            licenceDTO.setImages(lic.getImages()); // Include actual image data
             licenceDTOs.add(licenceDTO);
         }
         customerDTO.setLicenseOfCustomerDTOS(licenceDTOs);
         return customerDTO;
     }
+
 
     @Override
     public CustomerDTO getCustomerWithLicenses(UUID customerId) {

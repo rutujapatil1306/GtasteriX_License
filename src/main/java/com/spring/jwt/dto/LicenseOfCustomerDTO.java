@@ -7,6 +7,7 @@ import lombok.*;
 import org.modelmapper.ModelMapper;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -23,6 +24,8 @@ public class LicenseOfCustomerDTO {
 
 
     private Status status;
+
+    private List<byte[]> images;
 
         private LocalDate issueDate;
 

@@ -85,9 +85,13 @@ public class AppConfig {
 
 
                 .requestMatchers("/api/licenseList/getLicenseList").permitAll()
-                .requestMatchers("/api/licenseList/**").hasAnyAuthority("ADMIN")
+                //.requestMatchers("/api/licenseList/**").hasAnyAuthority("ADMIN")
+                .requestMatchers("/api/licenseList/**").permitAll()
+
                 .requestMatchers("/api/licenseOfCustomerController/**").hasAnyAuthority("ADMIN")
-                .requestMatchers("/api/customer/**").hasAnyAuthority("ADMIN")
+                //.requestMatchers("/api/customer/**").hasAnyAuthority("ADMIN")
+                .requestMatchers("/api/customer/**").permitAll()
+
                 .anyRequest().authenticated()
                 .and()
                 .authenticationManager(manager)

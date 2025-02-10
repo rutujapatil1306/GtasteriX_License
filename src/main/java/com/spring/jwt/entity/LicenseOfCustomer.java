@@ -9,7 +9,9 @@ import lombok.NoArgsConstructor;
 import org.modelmapper.ModelMapper;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -30,6 +32,11 @@ public class LicenseOfCustomer {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status;
+
+    @ElementCollection
+    @CollectionTable(name = "license_images", joinColumns = @JoinColumn(name = "license_of_customer_id"))
+    @Column(name = "image_data", columnDefinition = "LONGBLOB")  // Store binary data
+    private List<byte[]> images = new ArrayList<>();
 
     private LocalDate issueDate;
 
