@@ -13,12 +13,14 @@ import java.util.UUID;
 
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/licenseList")
 public class LicenseListController {
 
 @Autowired
 private ILicenseList iLicenseList;
 
+//admin
     @PostMapping("/saveLicense")
     public ResponseEntity<BaseResponseDTO> saveLicense(@RequestBody LicenseListDTO licenseListDTO)
     {
@@ -32,6 +34,7 @@ private ILicenseList iLicenseList;
         }
     }
 
+    //admin user
     @GetMapping("/getLicenseList")
     public ResponseEntity<BaseResponseDTO> getLicenseList()
     {
@@ -59,7 +62,7 @@ private ILicenseList iLicenseList;
         }
     }
 
-    @DeleteMapping("/deleteLicenseList")
+    @DeleteMapping("/deleteLicenseListByID")
     public ResponseEntity<BaseResponseDTO> deleteLicenseList(@RequestParam UUID licenseListID) {
         try {
             iLicenseList.deleteLicenseById(licenseListID);
@@ -70,4 +73,33 @@ private ILicenseList iLicenseList;
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
+    @PatchMapping("/updateLicenseStatus")
+    public ResponseEntity<BaseResponseDTO> updateEnum(@RequestParam UUID licenseId,@RequestParam String present){
+        try{
+            LicenseListDTO dto=iLicenseList.updateEnum(licenseId,present);
+            BaseResponseDTO responseDTO=new BaseResponseDTO(dto,"SUCCESS","Licence Update Successfully");
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
+
+        }
+
+        catch(Exception e){
+            BaseResponseDTO err=new BaseResponseDTO(e.getMessage(),"ERROR","Licence not updated Successfully");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
+
+        }
+    }
+
+    @PostMapping("/SaveMultipleInfo")
+    public ResponseEntity<BaseResponseDTO> createLicenseList(@RequestBody List<LicenseListDTO> LicenseListDTOList){
+        try{
+            List<LicenseListDTO> list=iLicenseList.saveLicense(LicenseListDTOList);
+            BaseResponseDTO DTO=new BaseResponseDTO(list,"All Ok","License Saved Successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(DTO);
+        }
+        catch(Exception e){
+            BaseResponseDTO DTO=new BaseResponseDTO(e.getMessage(),"ERROR","Failed to Saved License");
+            return ResponseEntity.status(HttpStatus.OK).body(DTO);
+        }
+    }
+
 }

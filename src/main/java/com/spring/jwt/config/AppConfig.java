@@ -80,14 +80,18 @@ public class AppConfig {
                 .requestMatchers("/booking/**").hasAnyAuthority("USER", "ADMIN","DEALER")
                 .requestMatchers("/userProfilePhoto/**").permitAll()
                 .requestMatchers("/photo/**").permitAll()
-                .requestMatchers("/admin/**").hasAuthority("ADMIN")
-                .requestMatchers("/dealerDocument/**").hasAnyAuthority("ADMIN", "DEALER")
+//                .requestMatchers("/admin/**").hasAuthority("ADMIN")
                 .requestMatchers("/user/**").hasAnyAuthority("USER", "ADMIN")
-                .requestMatchers("/dealer/**").hasAnyAuthority("DEALER", "ADMIN")
-                .requestMatchers("/car/**").hasAnyAuthority("DEALER", "ADMIN")
-                .requestMatchers("/api/licenseOfCustomerController/**").permitAll()
+
+
+                .requestMatchers("/api/licenseList/getLicenseList").permitAll()
+                //.requestMatchers("/api/licenseList/**").hasAnyAuthority("ADMIN")
+                .requestMatchers("/api/licenseList/**").permitAll()
+
+                .requestMatchers("/api/licenseOfCustomerController/**").hasAnyAuthority("ADMIN")
+                //.requestMatchers("/api/customer/**").hasAnyAuthority("ADMIN")
                 .requestMatchers("/api/customer/**").permitAll()
-                .requestMatchers("/api/licenseList/saveLicense").hasAuthority("ADMIN")
+
                 .anyRequest().authenticated()
                 .and()
                 .authenticationManager(manager)
