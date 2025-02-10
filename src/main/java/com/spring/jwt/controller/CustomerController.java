@@ -9,8 +9,10 @@ import com.spring.jwt.utils.BaseResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.cassandra.CassandraProperties;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -60,18 +62,33 @@ public class CustomerController {
         }
     }
 
-    @PatchMapping("/assignLicence")
+//    @PatchMapping("/assignLicence")
+//    public ResponseEntity<BaseResponseDTO> assignLicenceToCustomer(@RequestParam UUID customerId,
+//                                                                   @RequestParam UUID licenceId) {
+//        try {
+//            CustomerDTO updatedCustomer = icustomer.assignLicenceAndSetStatus(customerId, licenceId);
+//            BaseResponseDTO responseDTO = new BaseResponseDTO(updatedCustomer, "SUCCESS", "Licence assigned and status updated to PENDING.");
+//            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+//        } catch (RuntimeException e) {
+//            BaseResponseDTO errorResponseDTO = new BaseResponseDTO(null, "ERROR", "Operation failed: " + e.getMessage());
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDTO);
+//        }
+//    }
+
+    @PatchMapping(value = "/assignLicence", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BaseResponseDTO> assignLicenceToCustomer(@RequestParam UUID customerId,
-                                                                   @RequestParam UUID licenceId) {
+                                                                   @RequestParam UUID licenceId,
+                                                                   @RequestParam("images") List<MultipartFile> imageFiles) {
         try {
-            CustomerDTO updatedCustomer = icustomer.assignLicenceAndSetStatus(customerId, licenceId);
-            BaseResponseDTO responseDTO = new BaseResponseDTO(updatedCustomer, "SUCCESS", "Licence assigned and status updated to PENDING.");
+            CustomerDTO updatedCustomer = icustomer.assignLicenceAndSetStatus(customerId, licenceId, imageFiles);
+            BaseResponseDTO responseDTO = new BaseResponseDTO(updatedCustomer, "SUCCESS", "Licence assigned successfully");
             return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             BaseResponseDTO errorResponseDTO = new BaseResponseDTO(null, "ERROR", "Operation failed: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDTO);
         }
     }
+
 
     @GetMapping("/getByName")
     public ResponseEntity<BaseResponseDTO> getCustomerByName(@RequestParam String customerName) {
