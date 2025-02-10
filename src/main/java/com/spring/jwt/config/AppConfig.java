@@ -87,7 +87,7 @@ public class AppConfig {
                 .requestMatchers("/car/**").hasAnyAuthority("DEALER", "ADMIN")
                 .requestMatchers("/api/licenseOfCustomerController/**").permitAll()
                 .requestMatchers("/api/customer/**").permitAll()
-                .requestMatchers("/api/licenseList/**").permitAll()
+                .requestMatchers("/api/licenseList/saveLicense").hasAuthority("ADMIN")
                 .anyRequest().authenticated()
                 .and()
                 .authenticationManager(manager)
