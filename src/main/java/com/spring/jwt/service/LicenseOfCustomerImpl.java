@@ -129,9 +129,6 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
         return customerDTO;
     }
 
-
-
-
     @Override
     public List<LicenseOfCustomerDTO> findByStatus(String status) {
         Status st = Status.valueOf(status.toUpperCase());
@@ -334,13 +331,37 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
     @Override
     public LicenseListDTO deleteById(UUID licenseOfCustomerId) {
       LicenseOfCustomer licenseOfCustomer=  licenseOfCustomerRepository.findById(licenseOfCustomerId)
-              .orElseThrow(() -> new RuntimeException("Customer not found with ID: " +licenseOfCustomerId));;
+              .orElseThrow(() -> new RuntimeException("Customer not found with ID: " +licenseOfCustomerId));
        licenseOfCustomerRepository.delete(licenseOfCustomer);
        return null;
     }
 
+    @Override
+    public List<LicenseOfCustomerDTO> getByMailID(String mailID) {
+        // Fetch list of customers by email
+        List<Customer> customers = customerRepository.findByEmail(mailID);
+        if (customers.isEmpty()) {
+            throw new RuntimeException("Customer Not Found by mailID: " + mailID);
+        }
 
+        // Take the first customer from the list
+        Customer customer = customers.get(0);
+
+        // Fetch all licenses associated with the customer
+        List<LicenseOfCustomer> licenses = licenseOfCustomerRepository.findByCustomer(customer);
+        List<LicenseOfCustomerDTO> licenseDTOs = new ArrayList<>();
+
+        // Convert to DTO using for loop
+        for (LicenseOfCustomer license : licenses) {
+            licenseDTOs.add(modelMapper.map(license, LicenseOfCustomerDTO.class));
+        }
+
+        return licenseDTOs;
+    }
 }
+
+
+
 
 
 

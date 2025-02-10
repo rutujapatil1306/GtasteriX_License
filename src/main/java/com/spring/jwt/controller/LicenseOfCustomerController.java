@@ -206,15 +206,26 @@ public class LicenseOfCustomerController {
     @DeleteMapping("/deleteLicenseOfCustomer")
     public ResponseEntity<BaseResponseDTO> deleteById(@RequestParam UUID licenseOfCustomerId) {
         try {
-            LicenseListDTO dto = iLicenseOfCustomer.deleteById(licenseOfCustomerId);
-            BaseResponseDTO response = new BaseResponseDTO(dto, "ALL OK", "All LicenseOfCustomer Deleted Successfully");
+            LicenseListDTO licenseListDTO = iLicenseOfCustomer.deleteById(licenseOfCustomerId);
+            BaseResponseDTO response = new BaseResponseDTO(licenseListDTO, "ALL OK", "All LicenseOfCustomer Deleted Successfully");
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
             BaseResponseDTO err = new BaseResponseDTO("An unexpected error occurred", "Error", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
 
         }
+    }
 
+    @GetMapping("/getByMailID")
+    public ResponseEntity<BaseResponseDTO> getByMailID (@RequestParam String mailID){
+        try{
+            List<LicenseOfCustomerDTO> licenseListDTO = iLicenseOfCustomer.getByMailID(mailID);
+            BaseResponseDTO responseDTO = new BaseResponseDTO(licenseListDTO,"All OK","Customer Information By MailID");
+            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        } catch (Exception e){
+            BaseResponseDTO errorResponse = new BaseResponseDTO("Failed to Get Customer's Information by MailID","Error",e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
     }
 
 

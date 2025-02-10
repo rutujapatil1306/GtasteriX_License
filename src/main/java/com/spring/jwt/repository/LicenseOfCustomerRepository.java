@@ -1,5 +1,6 @@
 package com.spring.jwt.repository;
 
+import com.spring.jwt.entity.Customer;
 import com.spring.jwt.entity.LicenseOfCustomer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,4 +27,6 @@ public interface LicenseOfCustomerRepository extends JpaRepository<LicenseOfCust
     List<LicenseOfCustomer> findByLicense_LicenseID(UUID licenseListID);
 
     Page<LicenseOfCustomer> findAll(Specification<LicenseOfCustomer> spec, Pageable pageable);
+
+    List<LicenseOfCustomer> findByCustomer(Customer customer);
 }

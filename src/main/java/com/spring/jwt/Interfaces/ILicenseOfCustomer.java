@@ -21,4 +21,6 @@ public interface ILicenseOfCustomer {
     List<LicenseOfCustomerDTO> searchByFilterPage(FilterDto license, Integer pageNo, Integer pageSize);
 
     LicenseListDTO deleteById(UUID licenseOfCustomerId);
+
+    List<LicenseOfCustomerDTO> getByMailID(String mailID);
 }
