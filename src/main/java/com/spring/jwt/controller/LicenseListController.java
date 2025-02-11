@@ -1,5 +1,6 @@
 package com.spring.jwt.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spring.jwt.Interfaces.ILicenseList;
 import com.spring.jwt.dto.LicenseListDTO;
 import com.spring.jwt.utils.BaseResponseDTO;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,10 +24,14 @@ private ILicenseList iLicenseList;
 
 //admin
     @PostMapping("/saveLicense")
-    public ResponseEntity<BaseResponseDTO> saveLicense(@RequestBody LicenseListDTO licenseListDTO)
+    public ResponseEntity<BaseResponseDTO> saveLicense(@RequestPart String licenseListDTOString,
+                                                       @RequestPart MultipartFile images)
     {
         try{
-            LicenseListDTO licenseListDTO1 = iLicenseList.saveLicense(licenseListDTO);
+            ObjectMapper objectMapper = new ObjectMapper();
+            LicenseListDTO licenseListDTO2 = objectMapper.readValue(licenseListDTOString, LicenseListDTO.class);
+
+            LicenseListDTO licenseListDTO1 = iLicenseList.saveLicense(licenseListDTO2,images);
             BaseResponseDTO responseDTO = new BaseResponseDTO(licenseListDTO1,"Sucess","Added License Sucessfully");
             return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
         }catch (Exception e){

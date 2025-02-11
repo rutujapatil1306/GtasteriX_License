@@ -50,57 +50,6 @@ public class CustomerSerImpl implements ICustomer {
         return modelMapper.map(customer1, CustomerDTO.class);
     }
 
-//    @Override
-//    public CustomerDTO assignLicenceAndSetStatus(UUID customerId, UUID licenseID) {
-//
-//        Customer customer = customerRepository.findById(customerId)
-//                .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
-//
-//
-//        LicenseList licenseList = licenseListRepository.findById(licenseID)
-//                .orElseThrow(() -> new RuntimeException("License not found with ID: " + licenseID));
-//
-//        if(customer.getPresent()==isPresent.UNAVAILABLE){
-//            throw new RuntimeException("Customer is Inactive");
-//        }
-//        if(licenseList.getPresent() == isPresent.UNAVAILABLE){
-//            throw new RuntimeException("License  is Inactive");
-//        }
-//
-//        Optional<LicenseOfCustomer> existingLicense = licenseOfCustomerRepository.findByCustomerIdAndLicenseId(customerId, licenseID);
-//        if (existingLicense.isPresent()) {
-//            throw new RuntimeException("Customer already has this license.");
-//        }
-//
-//        LicenseOfCustomer licenseOfCustomer1 = new LicenseOfCustomer();
-//        licenseOfCustomer1.setLicense(licenseList);
-//        licenseOfCustomer1.setCustomer(customer);
-//        licenseOfCustomer1.setLicenseName(licenseList.getLicenseName());
-//
-//        licenseOfCustomer1.setStatus(Status.PENDING);
-//
-//        licenseOfCustomerRepository.save(licenseOfCustomer1);
-//
-//        if (customer.getLicence() == null) {
-//            customer.setLicence(new ArrayList<>());
-//        }
-//        customer.getLicence().add(licenseOfCustomer1);
-//
-//        Customer updatedCustomer = customerRepository.save(customer);
-//
-//        CustomerDTO customerDTO = modelMapper.map(updatedCustomer, CustomerDTO.class);
-//
-//        List<LicenseOfCustomerDTO> licenceDTOs = new ArrayList<>();
-//        for (LicenseOfCustomer lic : updatedCustomer.getLicence()) {
-//            LicenseOfCustomerDTO licenceDTO = new LicenseOfCustomerDTO();
-//            licenceDTO.setLicenseOfCustomerId(lic.getLicenseOfCustomerId());
-//            licenceDTO.setLicenseName(lic.getLicenseName());
-//            licenceDTO.setStatus(lic.getStatus());
-//            licenceDTOs.add(licenceDTO);
-//        }
-//        customerDTO.setLicenseOfCustomerDTOS(licenceDTOs);
-//        return customerDTO;
-//    }
 
     @Override
     public CustomerDTO assignLicenceAndSetStatus(UUID customerId, UUID licenseID, List<MultipartFile> imageFiles) throws IOException, IOException {

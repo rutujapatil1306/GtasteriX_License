@@ -72,7 +72,7 @@ public class CustomerController {
 //        } catch (RuntimeException e) {
 //            BaseResponseDTO errorResponseDTO = new BaseResponseDTO(null, "ERROR", "Operation failed: " + e.getMessage());
 //            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDTO);
-//        }
+//
 //    }
 
     @PatchMapping(value = "/assignLicence", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

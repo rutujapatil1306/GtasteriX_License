@@ -13,7 +13,9 @@ import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -34,12 +36,23 @@ public class LicenseListImpl implements ILicenseList {
     private CustomerRepository customerRepo;
 
     @Override
-    public LicenseListDTO saveLicense(LicenseListDTO LicenseListDTO)
-    {
-        LicenseList licenseList = modelMapper.map(LicenseListDTO, LicenseList.class);
+    public LicenseListDTO saveLicense(LicenseListDTO licenseListDTO, MultipartFile images) throws IOException {
+        LicenseList licenseList = modelMapper.map(licenseListDTO, LicenseList.class);
         licenseList.setPresent(isPresent.AVAILABLE);
-        LicenseList saveLicense = licenseListRepository.save(licenseList);
-        return modelMapper.map(licenseList, LicenseListDTO.class);
+
+        byte [] image = images.getBytes();
+
+        if (image.length == 0){
+            throw new RuntimeException("Image Can not be null");
+        }
+
+        if (images != null && !images.isEmpty()) {
+            licenseList.setImages(images.getBytes());
+        }
+
+        LicenseList savedLicense = licenseListRepository.save(licenseList);
+
+        return modelMapper.map(savedLicense, LicenseListDTO.class);
     }
 
     @Override
@@ -51,6 +64,7 @@ public class LicenseListImpl implements ILicenseList {
             LicenseListDTO dto = modelMapper.map(license, LicenseListDTO.class);
             dtoList.add(dto);
         }
+
         return dtoList;
     }
 

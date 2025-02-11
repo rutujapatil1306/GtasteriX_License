@@ -22,4 +22,12 @@ public class LicenseList {
 
     @Enumerated(EnumType.STRING)
     private isPresent present;
+
+    @Column(name = "image_data", columnDefinition = "LONGBLOB")
+    private byte[] images;
+
+    @Column(nullable = false)
+    private String description;
+
+
 }
