@@ -18,5 +18,9 @@ public class LicenseListDTO {
 
     private isPresent present;
 
+    private byte[] images;
+
+    private String description;
+
    // private List<LicenseOfCustomer> licenseOfCustomers;
 }

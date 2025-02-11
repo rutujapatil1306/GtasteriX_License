@@ -41,58 +41,31 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
     @Autowired
     private ModelMapper modelMapper;
 
-
-//    public CustomerDTO updateStatus(UUID licenseOfCustomerId,String status) {
-//
-//
-//        LicenseOfCustomer licenseOfCustomer = licenseOfCustomerRepository.findById(licenseOfCustomerId)
-//                .orElseThrow(() -> new RuntimeException("Licence not found with ID: " + licenseOfCustomerId));
-//
-//        if (licenseOfCustomer.getStatus() == Status.PENDING) {
-//            licenseOfCustomer.setStatus(Status.ACTIVE);
-//
-//            licenseOfCustomer.setIssueDate(LocalDate.now());
-//
-//            LicenseList licenseList = licenseOfCustomer.getLicense();
-//
-//            if (licenseList != null) {
-//                Integer validTill = licenseList.getValidTill();
-//                if (validTill != null && validTill > 0) {
-//                    licenseOfCustomer.setExpiryDate(LocalDate.now().plusYears(validTill));
-//                } else {
-//                    throw new RuntimeException("Invalid 'validTill' value. It must be a positive number.");
-//                }
-//            } else {
-//                throw new RuntimeException("No associated LicenseList found for this licence");
-//            }
-//        } else {
-//            throw new RuntimeException("Status can only be updated when the current status is PENDING");
-//        }
-//
-//        licenseOfCustomerRepository.save(licenseOfCustomer);
-//
-//        Customer customer = licenseOfCustomer.getCustomer();
-//        if (customer == null) {
-//            throw new RuntimeException("No associated customer found for this licence");
-//        }
-//
-//        CustomerDTO customerDTO = modelMapper.map(customer, CustomerDTO.class);
-//
-//        List<LicenseOfCustomerDTO> licenseOfCustomers = new ArrayList<>();
-//        for (LicenseOfCustomer customerLicence : customer.getLicence()) {
-//            LicenseOfCustomerDTO licenceDTO = modelMapper.map(customerLicence, LicenseOfCustomerDTO.class);
-//            licenseOfCustomers.add(licenceDTO);
-//        }
-//
-//        customerDTO.setLicenceDTOS(licenseOfCustomers);
-//
-//        return customerDTO;
-//    }
-
     public CustomerDTO updateStatus(UUID licenseOfCustomerId, String status) {
-
         LicenseOfCustomer licenseOfCustomer = licenseOfCustomerRepository.findById(licenseOfCustomerId)
-                .orElseThrow(() -> new RuntimeException("Licence not found with ID: " + licenseOfCustomerId));
+                .orElseThrow(() -> new RuntimeException("License not found with ID: " + licenseOfCustomerId));
+
+        // Check if the current status is ACTIVE
+        if (licenseOfCustomer.getStatus() == Status.ACTIVE)
+        {
+            throw new RuntimeException("Cannot change status. The license is already ACTIVE.");
+        }
+
+        // Check if the current status is PENDING
+        if (licenseOfCustomer.getStatus() == Status.PENDING)
+        {
+            if (!status.equalsIgnoreCase("ACTIVE") && !status.equalsIgnoreCase("REJECTED")) {
+                throw new RuntimeException("Cannot change status from PENDING to " + status + ". Only ACTIVE or REJECTED are allowed.");
+            }
+        }
+
+        // Check if the current status is REJECTED
+        if (licenseOfCustomer.getStatus() == Status.REJECTED) {
+            // Allow transition to ACTIVE or PENDING
+            if (!status.equalsIgnoreCase("ACTIVE") && !status.equalsIgnoreCase("PENDING")) {
+                throw new RuntimeException("Cannot change status from REJECTED to " + status + ". Only ACTIVE or PENDING are allowed.");
+            }
+        }
 
         Status newStatus;
         try {
@@ -101,7 +74,7 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
             throw new RuntimeException("Invalid status value: " + status);
         }
 
-        // Directly set the new status without any validation
+        // Directly set the new status
         licenseOfCustomer.setStatus(newStatus);
 
         if (newStatus == Status.ACTIVE) {
@@ -130,6 +103,93 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
     }
 
     @Override
+    public List<LicenseOfCustomerDTO> getAllLicenseOfCustomer() {
+        List<LicenseOfCustomerDTO> licenseOfCustomerDTOs = new ArrayList<>();
+
+        List<LicenseOfCustomer> licenseOfCustomers = licenseOfCustomerRepository.findAll();
+
+        for (LicenseOfCustomer license : licenseOfCustomers) {
+            // Check if the expiry date is in the past and update status if necessary
+            if (license.getExpiryDate() != null && license.getExpiryDate().isBefore(LocalDate.now())) {
+                license.setStatus(Status.RENEW);
+                // Save the updated status to the repository
+                licenseOfCustomerRepository.save(license);
+            }
+
+            LicenseOfCustomerDTO licenseDTO = modelMapper.map(license, LicenseOfCustomerDTO.class);
+
+            // Map Customer
+            if (license.getCustomer() != null) {
+                CustomerDTO customerDTO = modelMapper.map(license.getCustomer(), CustomerDTO.class);
+                licenseDTO.setCustomer(customerDTO);
+            }
+
+            // Map License List
+            if (license.getLicense() != null) {
+                LicenseListDTO licenseListDTO = modelMapper.map(license.getLicense(), LicenseListDTO.class);
+                licenseDTO.setLicenseList(licenseListDTO);
+            }
+
+            // Update expiry date if status is RENEW
+            if (license.getStatus() == Status.RENEW) {
+                LicenseList licenseList = license.getLicense();
+                if (licenseList != null && licenseList.getValidTill() != null && licenseList.getValidTill() > 0) {
+                    license.setExpiryDate(LocalDate.now().plusYears(licenseList.getValidTill()));
+                    licenseOfCustomerRepository.save(license); // Save the updated expiry date
+                }
+            }
+
+            licenseOfCustomerDTOs.add(licenseDTO);
+        }
+
+        return licenseOfCustomerDTOs;
+    }
+
+
+
+
+//    @Override
+//    public CustomerDTO updateStatus(UUID licenseOfCustomerId, String status) {
+//
+//        LicenseOfCustomer licenseOfCustomer = licenseOfCustomerRepository.findById(licenseOfCustomerId)
+//                .orElseThrow(() -> new RuntimeException("Licence not found with ID: " + licenseOfCustomerId));
+//
+//        Status newStatus;
+//        try {
+//            newStatus = Status.valueOf(status.toUpperCase());
+//        } catch (IllegalArgumentException e) {
+//            throw new RuntimeException("Invalid status value: " + status);
+//        }
+//
+//        // Directly set the new status without any validation
+//        licenseOfCustomer.setStatus(newStatus);
+//
+//        if (newStatus == Status.ACTIVE) {
+//            licenseOfCustomer.setIssueDate(LocalDate.now());
+//            LicenseList licenseList = licenseOfCustomer.getLicense();
+//            if (licenseList == null || licenseList.getValidTill() == null || licenseList.getValidTill() <= 0) {
+//                throw new RuntimeException("Invalid or missing 'validTill' in LicenseList.");
+//            }
+//            licenseOfCustomer.setExpiryDate(LocalDate.now().plusYears(licenseList.getValidTill()));
+//        }
+//
+//        licenseOfCustomerRepository.save(licenseOfCustomer);  // Save the updated license
+//
+//        // Map customer to DTO
+//        Customer customer = licenseOfCustomer.getCustomer();
+//        if (customer == null) {
+//            throw new RuntimeException("No associated customer found for this license.");
+//        }
+//
+//        CustomerDTO customerDTO = modelMapper.map(customer, CustomerDTO.class);
+//        customerDTO.setLicenseOfCustomerDTOS(customer.getLicence().stream()
+//                .map(lic -> modelMapper.map(lic, LicenseOfCustomerDTO.class))
+//                .collect(Collectors.toList()));
+//
+//        return customerDTO;
+//    }
+
+    @Override
     public List<LicenseOfCustomerDTO> findByStatus(String status) {
         Status st = Status.valueOf(status.toUpperCase());
         List<LicenseOfCustomer> ll = licenseOfCustomerRepository.findByStatus(st);
@@ -140,93 +200,31 @@ public class LicenseOfCustomerImpl implements ILicenseOfCustomer {
         return li;
     }
 
-    @Override
-    public List<LicenseOfCustomerDTO> getAllLicenseOfCustomer() {
-        List<LicenseOfCustomerDTO> licenseOfCustomerDTOs = new ArrayList<>();
-
-        List<LicenseOfCustomer> licenseOfCustomers = licenseOfCustomerRepository.findAll();
-
-        for (LicenseOfCustomer license : licenseOfCustomers) {
-            LicenseOfCustomerDTO licenseDTO = modelMapper.map(license, LicenseOfCustomerDTO.class);
-
-            if (license.getCustomer() != null) {
-                CustomerDTO customerDTO = modelMapper.map(license.getCustomer(), CustomerDTO.class);
-                licenseDTO.setCustomer(customerDTO);
-            }
-            if (license.getLicense() != null) {
-                LicenseListDTO licenseListDTO = modelMapper.map(license.getLicense(), LicenseListDTO.class);
-                licenseDTO.setLicenseList(licenseListDTO);
-            }
-
-            licenseOfCustomerDTOs.add(licenseDTO);
-
-        }
-            return licenseOfCustomerDTOs;
-
-    }
-
 //    @Override
-//    public List<LicenseOfCustomerDTO> searchByFilterPage(FilterDto filterDto, Integer pageNo, Integer pageSize) {
-//        Specification<LicenseOfCustomer> spec = (root, query, criteriaBuilder) -> {
-//            List<Predicate> predicates = new ArrayList<>();
+//    public List<LicenseOfCustomerDTO> getAllLicenseOfCustomer() {
+//        List<LicenseOfCustomerDTO> licenseOfCustomerDTOs = new ArrayList<>();
 //
-//            // Filtering by license name
-//            if (filterDto.getLicenseName() != null && !filterDto.getLicenseName().isEmpty()) {
-//                predicates.add(criteriaBuilder.like(
-//                        criteriaBuilder.lower(root.get("licenseName")),
-//                        "%" + filterDto.getLicenseName().toLowerCase() + "%"
-//                ));
+//        List<LicenseOfCustomer> licenseOfCustomers = licenseOfCustomerRepository.findAll();
+//
+//        for (LicenseOfCustomer license : licenseOfCustomers) {
+//            LicenseOfCustomerDTO licenseDTO = modelMapper.map(license, LicenseOfCustomerDTO.class);
+//
+//            if (license.getCustomer() != null) {
+//                CustomerDTO customerDTO = modelMapper.map(license.getCustomer(), CustomerDTO.class);
+//                licenseDTO.setCustomer(customerDTO);
+//            }
+//            if (license.getLicense() != null) {
+//                LicenseListDTO licenseListDTO = modelMapper.map(license.getLicense(), LicenseListDTO.class);
+//                licenseDTO.setLicenseList(licenseListDTO);
 //            }
 //
-//            // Filtering by status
-////            if (filterDto.getStatus() != null) {
-//               // predicates.add(criteriaBuilder.equal(root.get("status"), filterDto.getStatus()));
-////            }
+//            licenseOfCustomerDTOs.add(licenseDTO);
 //
-//            // Filtering by issue date
-//            if (filterDto.getIssueDate() != null) {
-//                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("issueDate"), filterDto.getIssueDate()));
-//            }
-//
-//            // Filtering by expiry date
-//            if (filterDto.getExpiryDate() != null) {
-//                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("expiryDate"), filterDto.getExpiryDate()));
-//            }
-//
-//            // Filtering by customer details (if applicable)
-//            if (filterDto.getCustomer() != null && filterDto.getCustomer().getCustomerId() != null) {
-//                predicates.add(criteriaBuilder.equal(root.get("customer").get("id"), filterDto.getCustomer().getCustomerId()));
-//            }
-////            Predicate statusPredicate = criteriaBuilder.or(
-////                    criteriaBuilder.equal(root.get("status"), Status.ACTIVE),
-////                    criteriaBuilder.equal(root.get("status"), Status.PENDING),
-////                    criteriaBuilder.equal(root.get("status"),Status.REJECTED ),
-////                    criteriaBuilder.equal(root.get("status"),Status.RENEW)
-////            );
-////            predicates.add(statusPredicate);
-//            // Query sorting by most recent license ID
-//            query.orderBy(criteriaBuilder.desc(root.get("id")));
-//
-//            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-//        };
-//
-//        // Create pageable object
-//        Pageable pageable = PageRequest.of(pageNo - 1, pageSize); // Convert to zero-based index for page number
-//
-//        // Fetch filtered data from repository
-//        Page<LicenseOfCustomer> licensePage = licenseOfCustomerRepository.findAll(spec, pageable);
-//
-//        // Check if the result is empty
-//        if (licensePage.isEmpty()) {
-//            throw new PageNotFoundException("No licenses found for the specified filter and page.");
 //        }
-//        // Convert entity to DTO and return
-//        List<LicenseOfCustomerDTO> licenseDtoList = licensePage.stream()
-//                .map(LicenseOfCustomerDTO::new)
-//                .toList();
+//            return licenseOfCustomerDTOs;
 //
-//        return licenseDtoList;
 //    }
+
 
     @Override
     public List<LicenseOfCustomerDTO> searchByFilterPage(FilterDto filterDto, Integer pageNo, Integer pageSize) {
