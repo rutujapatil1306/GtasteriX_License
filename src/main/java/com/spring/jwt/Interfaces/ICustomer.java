@@ -1,5 +1,7 @@
 package com.spring.jwt.Interfaces;
 
+import com.spring.jwt.dto.CountDto;
+import com.spring.jwt.dto.CustomerCountDto;
 import com.spring.jwt.dto.CustomerDTO;
 import com.spring.jwt.dto.LicenseListDTO;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,4 +34,10 @@ public interface ICustomer {
     CustomerDTO updateEnum(UUID customerId, String present);
 
     List<CustomerDTO> saveCustomerList(List<CustomerDTO> customerDTOList);
+
+
+
+    CustomerCountDto getCountOfCustomer(String isPresent);
+
+    CountDto getAllCount(String isPresent);
 }

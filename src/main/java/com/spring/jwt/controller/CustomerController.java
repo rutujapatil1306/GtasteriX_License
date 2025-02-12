@@ -1,6 +1,8 @@
 package com.spring.jwt.controller;
 
 import com.spring.jwt.Interfaces.ICustomer;
+import com.spring.jwt.dto.CountDto;
+import com.spring.jwt.dto.CustomerCountDto;
 import com.spring.jwt.dto.CustomerDTO;
 import com.spring.jwt.dto.LicenseListDTO;
 import com.spring.jwt.entity.Customer;
@@ -161,6 +163,34 @@ public class CustomerController {
         try {
             List<CustomerDTO> customerDTOList1 = icustomer.saveCustomerList(customerDTOList);
             BaseResponseDTO responseDTO = new BaseResponseDTO(customerDTOList1, "Success", "successfully get this ");
+            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        } catch (Exception e) {
+            BaseResponseDTO errorResponseDTO = new BaseResponseDTO(e.getMessage(), "ERROR", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponseDTO);
+        }
+    }
+
+
+    @GetMapping("/Count")
+    public ResponseEntity<BaseResponseDTO> getCount(@RequestParam String isPresent){
+        try{
+
+        CustomerCountDto customerCountDtos=icustomer.getCountOfCustomer(isPresent);
+            BaseResponseDTO responseDTO = new BaseResponseDTO(customerCountDtos, "Success", "successfully count  get this ");
+            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        } catch (Exception e) {
+            BaseResponseDTO errorResponseDTO = new BaseResponseDTO(e.getMessage(), "ERROR", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponseDTO);
+        }
+
+    }
+
+    @GetMapping("/get count")
+    public ResponseEntity<BaseResponseDTO> getCountAll(@RequestParam String isPresent){
+        try{
+
+            CountDto customerCountDtos=icustomer.getAllCount(isPresent);
+            BaseResponseDTO responseDTO = new BaseResponseDTO(customerCountDtos, "Success", "successfully count  get this ");
             return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
         } catch (Exception e) {
             BaseResponseDTO errorResponseDTO = new BaseResponseDTO(e.getMessage(), "ERROR", e.getMessage());

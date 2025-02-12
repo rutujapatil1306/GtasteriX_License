@@ -2,6 +2,7 @@ package com.spring.jwt.repository;
 
 import com.spring.jwt.entity.Customer;
 import com.spring.jwt.entity.LicenseOfCustomer;
+import com.spring.jwt.entity.isPresent;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,5 +26,7 @@ public interface CustomerRepository extends JpaRepository<Customer,UUID> {
    List<Customer> findByArea(String area);
 
    List<Customer> findByEmail(String Email);
+
+    List<Customer> findByPresent(isPresent present);
 
 }

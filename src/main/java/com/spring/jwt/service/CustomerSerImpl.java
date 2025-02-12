@@ -1,6 +1,8 @@
 package com.spring.jwt.service;
 
 import com.spring.jwt.Interfaces.ICustomer;
+import com.spring.jwt.dto.CountDto;
+import com.spring.jwt.dto.CustomerCountDto;
 import com.spring.jwt.dto.CustomerDTO;
 import com.spring.jwt.dto.LicenseOfCustomerDTO;
 import com.spring.jwt.entity.*;
@@ -281,7 +283,122 @@ public class CustomerSerImpl implements ICustomer {
                     .collect(Collectors.toList());
         }
 
+//    @Override
+//    public CustomerCountDto getCountOfCustomer(String present) {
+//       CustomerCountDto customerCountDto = null;
+//       Long countAvailable = 0L;
+//       Long countUnavailable=0L;
+//
+//        isPresent availability;
+//        try {
+//            availability = isPresent.valueOf(present.toUpperCase());
+//        } catch (IllegalArgumentException e) {
+//            throw new RuntimeException("Invalid value for 'present': " + present);
+//        }
+//
+//        List<CustomerDTO> customerDTOS=new ArrayList<>();
+//       if( availability.equals(isPresent.AVAILABLE)){
+//           List<Customer> customers=customerRepository.findByPresent(availability);
+//
+//           for(Customer customer: customers){
+//               CustomerDTO customerDTO=modelMapper.map(customer,CustomerDTO.class);
+//               customerDTOS.add(customerDTO);
+//              countAvailable=  customerDTOS.stream().count();
+//           }
+//           customerCountDto.setCustomerDTOS(customerDTOS);
+//           customerCountDto.setCountOfCustomerAvailable(countAvailable);
+//
+//           return customerCountDto;
+//
+//       }
+//       else if (availability.equals(isPresent.UNAVAILABLE)) {
+//           List<Customer> customerList=customerRepository.findByPresent(availability);
+//           for(Customer customer: customerList){
+//               CustomerDTO customerDTO=modelMapper.map(customer,CustomerDTO.class);
+//               customerDTOS.add(customerDTO);
+//               countUnavailable=customerDTOS.stream().count();
+//
+//           }
+//           customerCountDto.setCustomerDTOS(customerDTOS);
+//           customerCountDto.setCountOfCustomerUnavailable(countUnavailable);
+//           return customerCountDto;
+//
+//       }
+//
+//
+//        return customerCountDto;
+//    }
+
+    @Override
+    public CustomerCountDto getCountOfCustomer(String present) {
+        isPresent availability;
+        try {
+            availability = isPresent.valueOf(present.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid value for 'present': " + present);
+        }
+
+        List<CustomerDTO> customerDTOS = new ArrayList<>();
+        List<Customer> customers = customerRepository.findByPresent(availability); // Updated method call
+
+        for (Customer customer : customers) {
+            CustomerDTO customerDTO = modelMapper.map(customer, CustomerDTO.class);
+            customerDTOS.add(customerDTO);
+        }
+
+        CustomerCountDto customerCountDto = new CustomerCountDto();
+
+        if (availability == isPresent.AVAILABLE) {
+            customerCountDto.setCountOfCustomerAvailable((long) customerDTOS.size());
+
+        } else {
+            customerCountDto.setCountOfCustomerUnavailable((long) customerDTOS.size());
+        }
+
+        return customerCountDto;
     }
+
+    @Override
+    public CountDto getAllCount(String present) {
+
+        isPresent availability;
+        try {
+            availability = isPresent.valueOf(present.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid value for 'present': " + present);
+        }
+
+
+        List<CustomerDTO> customerDTOS = new ArrayList<>();
+        List<Customer> customers = customerRepository.findByPresent(availability); // Updated method call
+
+        for (Customer customer : customers) {
+            CustomerDTO customerDTO = modelMapper.map(customer, CustomerDTO.class);
+            customerDTOS.add(customerDTO);
+        }
+
+        CountDto countDto = new CountDto();
+
+        if (availability == isPresent.AVAILABLE) {
+           List<LicenseOfCustomer> licenseOfCustomers= licenseOfCustomerRepository.findAll();
+           Long count=licenseOfCustomers.stream().count();
+           Long countUnavailable=0L;
+            countDto.setCountOfCustomerLicense(count);
+            countDto.setCountOfCustomerAvailable((long) customerDTOS.size());
+            countDto.setCountOfCustomerUnavailable(countUnavailable);
+        } else {
+            List<LicenseOfCustomer> licenseOfCustomers= licenseOfCustomerRepository.findAll();
+            Long count=licenseOfCustomers.stream().count();
+            Long countAvailable=0L;
+            countDto.setCountOfCustomerLicense(count);
+            countDto.setCountOfCustomerAvailable((long) customerDTOS.size());
+            countDto.setCountOfCustomerUnavailable(countAvailable);
+        }
+        return countDto;
+    }
+
+
+}
 
 
 
