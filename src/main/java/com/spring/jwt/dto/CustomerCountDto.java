@@ -13,7 +13,6 @@ import java.util.List;
 @Builder
 public class CustomerCountDto {
 
-
     List<CustomerDTO> customerDTOS;
      Long countOfCustomer;
 }

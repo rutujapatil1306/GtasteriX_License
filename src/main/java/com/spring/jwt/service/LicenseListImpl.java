@@ -109,7 +109,6 @@ public class LicenseListImpl implements ILicenseList {
             throw new RuntimeException("Invalid value for 'present': " + present);
         }
 
-
         LicenseList list = licenseListRepository.findById(licenseId)
                 .orElseThrow(() -> new RuntimeException("License with ID " + licenseId + " Not Found"));
 
