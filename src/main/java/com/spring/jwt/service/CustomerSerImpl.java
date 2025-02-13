@@ -13,10 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -244,7 +241,6 @@ public class CustomerSerImpl implements ICustomer {
             throw new RuntimeException("Invalid value for 'present': " + present);
         }
 
-
         Customer list = customerRepository.findById(licenseId)
                 .orElseThrow(() -> new RuntimeException("License with ID " + licenseId + " Not Found"));
 
@@ -281,7 +277,53 @@ public class CustomerSerImpl implements ICustomer {
                     .collect(Collectors.toList());
         }
 
+    @Override
+    public Map<String, Long> getAllCustomersCount() {
+        List<Customer> customers = customerRepository.findAll();
+
+        long activeCount = 0, pendingCount = 0, rejectedCount = 0, renewCount = 0;
+        long availableCount = 0, unavailableCount = 0;
+
+        for (Customer customer : customers) {
+            if (customer.getPresent() == isPresent.AVAILABLE) {
+                availableCount++;
+            } else if (customer.getPresent() == isPresent.UNAVAILABLE) {
+                unavailableCount++;
+            }
+
+            for (LicenseOfCustomer license : customer.getLicence()) {
+                switch (license.getStatus()) {
+                    case ACTIVE: activeCount++; break;
+                    case PENDING: pendingCount++; break;
+                    case REJECTED: rejectedCount++; break;
+                    case RENEW: renewCount++; break;
+                    default: break;
+                }
+            }
+
+        }
+
+        List<LicenseOfCustomer> s= licenseOfCustomerRepository.findAll();
+        long LicenseOftotalCustomers=s.size();
+
+        long totalCustomers = activeCount + pendingCount + rejectedCount + renewCount + availableCount + unavailableCount;
+
+        Map<String, Long> customerCountMap = new HashMap<>();
+        customerCountMap.put("TOTAL_CUSTOMERS", totalCustomers);
+        customerCountMap.put("TOTAL License Of CUSTOMERS", LicenseOftotalCustomers);
+
+        customerCountMap.put("ACTIVE", activeCount);
+        customerCountMap.put("PENDING", pendingCount);
+        customerCountMap.put("REJECTED", rejectedCount);
+        customerCountMap.put("RENEW", renewCount);
+        customerCountMap.put("AVAILABLE", availableCount);
+        customerCountMap.put("UNAVAILABLE", unavailableCount);
+
+        return customerCountMap;
     }
+
+
+}
 
 
 

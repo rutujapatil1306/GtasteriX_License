@@ -22,16 +22,15 @@ public class LicenseOfCustomerDTO {
 
         private String licenseName;
 
+        private Status status;
 
-    private Status status;
-
-    private List<byte[]> images;
+        private List<byte[]> images;
 
         private LocalDate issueDate;
 
         private LocalDate expiryDate;
 
-       private CustomerDTO customer;
+        private CustomerDTO customer;
 
         private LicenseListDTO licenseList;
 

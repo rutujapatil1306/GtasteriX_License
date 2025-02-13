@@ -21,11 +21,9 @@ public class CustomerDTO {
 
     private UUID customerId;
 
-
     @NotBlank(message = "Name is required.")
     @Size(max = 50, message = "Name must not exceed 50 characters.")
     private String firstName;
-
 
     @NotBlank(message = "Name is required.")
     @Size(max = 50, message = "Name must not exceed 50 characters.")

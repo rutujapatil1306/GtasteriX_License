@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -62,19 +63,6 @@ public class CustomerController {
         }
     }
 
-//    @PatchMapping("/assignLicence")
-//    public ResponseEntity<BaseResponseDTO> assignLicenceToCustomer(@RequestParam UUID customerId,
-//                                                                   @RequestParam UUID licenceId) {
-//        try {
-//            CustomerDTO updatedCustomer = icustomer.assignLicenceAndSetStatus(customerId, licenceId);
-//            BaseResponseDTO responseDTO = new BaseResponseDTO(updatedCustomer, "SUCCESS", "Licence assigned and status updated to PENDING.");
-//            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-//        } catch (RuntimeException e) {
-//            BaseResponseDTO errorResponseDTO = new BaseResponseDTO(null, "ERROR", "Operation failed: " + e.getMessage());
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDTO);
-//
-//    }
-
     @PatchMapping(value = "/assignLicence", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BaseResponseDTO> assignLicenceToCustomer(@RequestParam UUID customerId,
                                                                    @RequestParam UUID licenceId,
@@ -118,7 +106,8 @@ public class CustomerController {
     }
 
     @PatchMapping("/UpdateLicense")
-    public ResponseEntity<BaseResponseDTO> assignLicenceToCustomer(@RequestParam UUID customerId, @RequestBody CustomerDTO customerDTO) {
+    public ResponseEntity<BaseResponseDTO> assignLicenceToCustomer(@RequestParam UUID customerId,
+                                                                   @RequestBody CustomerDTO customerDTO) {
         try {
             CustomerDTO updatedCustomer = icustomer.UpdateCustomerDetail(customerId,customerDTO);
             BaseResponseDTO responseDTO = new BaseResponseDTO(updatedCustomer, "SUCCESS", "Licence Updated Successfully");
@@ -165,6 +154,19 @@ public class CustomerController {
         } catch (Exception e) {
             BaseResponseDTO errorResponseDTO = new BaseResponseDTO(e.getMessage(), "ERROR", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponseDTO);
+        }
+    }
+
+    @GetMapping("/getAllCustomerCount")
+    public ResponseEntity<BaseResponseDTO> getAllCustomersCount()
+    {
+        try {
+            Map<String, Long> customerCounts = icustomer.getAllCustomersCount();
+            BaseResponseDTO response = new BaseResponseDTO(customerCounts, "SUCCESS", "Customer counts retrieved successfully");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            BaseResponseDTO errorResponse = new BaseResponseDTO(null, "ERROR", "Failed to retrieve customers: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 
